@@ -1,0 +1,212 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "MacBook Air M4",
+      "category": "Laptop",
+      "sku": "MBA-M3-13",
+      "price": 32990000,
+      "stock": 24,
+      "status": "Active"
+    },
+    {
+      "id": "2",
+      "name": "iPhone 15 Pro",
+      "category": "Smartphone",
+      "sku": "IP15P-256",
+      "price": 28990000,
+      "stock": 12,
+      "status": "Active"
+    },
+    {
+      "id": "3",
+      "name": "Sony WH-1000XM5",
+      "category": "Headphone",
+      "sku": "SONY-XM5",
+      "price": 7990000,
+      "stock": 0,
+      "status": "Inactive"
+    },
+    {
+      "id": "4",
+      "name": "Logitech MX Keys S",
+      "category": "Keyboard",
+      "sku": "LOGI-MXKS",
+      "price": 2790000,
+      "stock": 37,
+      "status": "Active"
+    },
+    {
+      "id": "5",
+      "name": "Samsung T7 1TB",
+      "category": "Storage",
+      "sku": "SAM-T7-1TB",
+      "price": 2490000,
+      "stock": 8,
+      "status": "Active"
+    },
+    {
+      "id": "GsZ_m_lLtuQ",
+      "name": "Sạc 2000W",
+      "category": "Phụ kiện",
+      "sku": "MU-1",
+      "price": 800000,
+      "stock": 1000,
+      "status": "Active"
+    }
+  ],
+  "customers": [
+    {
+      "id": "1",
+      "name": "Jane Cooper",
+      "company": "Microsoft",
+      "phone": "(225) 555-0118",
+      "email": "jane@microsoft.com",
+      "country": "United States",
+      "status": "Active",
+      "avatar": "https://i.pravatar.cc/40?img=47"
+    },
+    {
+      "id": "2",
+      "name": "Floyd Miles",
+      "company": "Yahoo",
+      "phone": "(205) 555-0100",
+      "email": "floyd@yahoo.com",
+      "country": "Kiribati",
+      "status": "Inactive",
+      "avatar": "https://i.pravatar.cc/40?img=11"
+    },
+    {
+      "id": "3",
+      "name": "Ronald Richards",
+      "company": "Adobe",
+      "phone": "(302) 555-0107",
+      "email": "ronald@adobe.com",
+      "country": "Israel",
+      "status": "Inactive",
+      "avatar": "https://i.pravatar.cc/40?img=15"
+    },
+    {
+      "id": "4",
+      "name": "Marvin McKinney",
+      "company": "Tesla",
+      "phone": "(252) 555-0126",
+      "email": "marvin@tesla.com",
+      "country": "Iran",
+      "status": "Active",
+      "avatar": "https://i.pravatar.cc/40?img=3"
+    },
+    {
+      "id": "5",
+      "name": "Jerome Bell",
+      "company": "Google",
+      "phone": "(629) 555-0129",
+      "email": "jerome@google.com",
+      "country": "Reunion",
+      "status": "Active",
+      "avatar": "https://i.pravatar.cc/40?img=17"
+    },
+    {
+      "id": "6",
+      "name": "Kathryn Murphy",
+      "company": "Microsoft",
+      "phone": "(406) 555-0120",
+      "email": "kathryn@microsoft.com",
+      "country": "Curacao",
+      "status": "Active",
+      "avatar": "https://i.pravatar.cc/40?img=45"
+    },
+    {
+      "id": "7",
+      "name": "Jacob Jones",
+      "company": "Yahoo",
+      "phone": "(208) 555-0112",
+      "email": "jacob@yahoo.com",
+      "country": "Brazil",
+      "status": "Active",
+      "avatar": "https://i.pravatar.cc/40?img=8"
+    },
+    {
+      "id": "8",
+      "name": "Kristin Watson",
+      "company": "Facebook",
+      "phone": "(704) 555-0127",
+      "email": "kristin@facebook.com",
+      "country": "Aland Islands",
+      "status": "Inactive",
+      "avatar": "https://i.pravatar.cc/40?img=49"
+    },
+    {
+      "id": "Dl0lsbgKkK8",
+      "name": "hieu",
+      "company": "abc",
+      "phone": "0987654321",
+      "email": "hieu@gmail.com",
+      "country": "vn",
+      "status": "Active",
+      "avatar": "https://res-console.cloudinary.com/digvlzedr/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/dWZ3b2tleG1sN2lidG1zcGR4b3E=/template_primary"
+    },
+    {
+      "id": "ZpfrbP1Rdn4",
+      "name": "hieu",
+      "company": "abc",
+      "phone": "0987654321",
+      "email": "hieu@gmail.com",
+      "country": "vn",
+      "status": "Active",
+      "avatar": "https://res-console.cloudinary.com/digvlzedr/thumbnails/transform/v1/image/upload/Y19maWxsLGhfMjAwLHdfMjAw/v1/dWZ3b2tleG1sN2lidG1zcGR4b3E=/template_primary"
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "name": "Laptop",
+      "slug": "laptop",
+      "created_at": "2026-04-14T01:00:00.000Z",
+      "updated_at": "2026-04-14T01:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "Smartphone",
+      "slug": "smartphone",
+      "created_at": "2026-04-14T01:10:00.000Z",
+      "updated_at": "2026-04-14T07:21:40.650Z"
+    },
+    {
+      "id": "_dpEhqnXO98",
+      "name": "Phụ Kiện",
+      "slug": "phu-kien",
+      "created_at": "2026-04-14T07:23:01.358Z",
+      "updated_at": "2026-04-14T07:24:19.247Z"
+    },
+    {
+      "id": "1xpxx6Pn6is",
+      "name": "Table",
+      "slug": "may-tinh-bang",
+      "created_at": "2026-04-14T07:26:03.872Z",
+      "updated_at": "2026-04-14T07:26:03.872Z"
+    },
+    {
+      "id": "HyvRuZmLBTM",
+      "name": "hieu",
+      "slug": "hieu",
+      "created_at": "2026-04-14T08:01:51.390Z",
+      "updated_at": "2026-04-14T08:20:01.116Z"
+    },
+    {
+      "id": "b05AHT2DSf4",
+      "name": "hieu",
+      "slug": "hieu2",
+      "created_at": "2026-04-14T08:32:21.519Z",
+      "updated_at": "2026-04-14T08:32:21.519Z"
+    },
+    {
+      "id": "YOF_NQsD7WA",
+      "name": "Bui Thi R",
+      "slug": "hieu4",
+      "created_at": "2026-04-14T08:37:31.551Z",
+      "updated_at": "2026-04-14T08:37:31.551Z"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
