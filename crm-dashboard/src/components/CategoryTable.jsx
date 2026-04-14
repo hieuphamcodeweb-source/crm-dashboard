@@ -71,10 +71,18 @@ export default function CategoryTable() {
     }
 
     if (sortBy === 'Oldest') {
-      return [...matched].sort((a, b) => Number(a.id) - Number(b.id));
+      return [...matched].sort((a, b) =>
+        a.created_at && b.created_at
+          ? new Date(a.created_at) - new Date(b.created_at)
+          : Number(a.id) - Number(b.id)
+      );
     }
 
-    return [...matched].sort((a, b) => Number(b.id) - Number(a.id));
+    return [...matched].sort((a, b) =>
+      a.created_at && b.created_at
+        ? new Date(b.created_at) - new Date(a.created_at)
+        : Number(b.id) - Number(a.id)
+    );
   }, [categories, search, sortBy]);
 
   const openAddModal = () => {

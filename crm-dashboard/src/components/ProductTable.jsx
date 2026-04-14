@@ -117,10 +117,18 @@ export default function ProductTable() {
     }
 
     if (sortBy === 'Oldest') {
-      return [...matchedProducts].sort((a, b) => a.id - b.id);
+      return [...matchedProducts].sort((a, b) =>
+        a.created_at && b.created_at
+          ? new Date(a.created_at) - new Date(b.created_at)
+          : Number(a.id) - Number(b.id)
+      );
     }
 
-    return [...matchedProducts].sort((a, b) => b.id - a.id);
+    return [...matchedProducts].sort((a, b) =>
+      a.created_at && b.created_at
+        ? new Date(b.created_at) - new Date(a.created_at)
+        : Number(b.id) - Number(a.id)
+    );
   }, [products, search, sortBy]);
 
   const openAddModal = () => {
@@ -138,6 +146,7 @@ export default function ProductTable() {
         id: nextId,
         ...values,
         sku: values.sku.toUpperCase(),
+        created_at: new Date().toISOString(),
       };
 
       try {

@@ -85,10 +85,18 @@ export default function CustomerTable() {
     }
 
     if (sortBy === 'Oldest') {
-      return [...matchedCustomers].sort((a, b) => a.id - b.id);
+      return [...matchedCustomers].sort((a, b) =>
+        a.created_at && b.created_at
+          ? new Date(a.created_at) - new Date(b.created_at)
+          : Number(a.id) - Number(b.id)
+      );
     }
 
-    return [...matchedCustomers].sort((a, b) => b.id - a.id);
+    return [...matchedCustomers].sort((a, b) =>
+      a.created_at && b.created_at
+        ? new Date(b.created_at) - new Date(a.created_at)
+        : Number(b.id) - Number(a.id)
+    );
   }, [customers, search, sortBy]);
 
   const openAddModal = () => {
@@ -102,7 +110,7 @@ export default function CustomerTable() {
       const values = await form.validateFields();
       const maxId = customers.reduce((max, customer) => Math.max(max, Number(customer.id) || 0), 0);
       const nextId = maxId + 1;
-      const newCustomer = { id: nextId, ...values };
+      const newCustomer = { id: nextId, ...values, created_at: new Date().toISOString() };
 
       try {
         const response = await fetch(CUSTOMER_API_URL, {
