@@ -1,6 +1,6 @@
 ---
 name: figma-to-react
-description: Render Figma node to React UI with fallback to screenshot if MCP fails.
+description: Renders Figma nodes into pixel-perfect React/Tailwind components. Use when the user provides a Figma link, a node ID, or asks to "convert design to code", "generate React from Figma", or "implement this Figma layout". Supports fallback to screenshot analysis if MCP is unavailable.
 metadata:
   version: 3.0
   mcp-server: figma

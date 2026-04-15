@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { App, Button, Form, Input, Modal } from 'antd';
+import { App, Button, Form, Input, Modal, Tooltip } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const CATEGORY_API_URL = 'http://localhost:3001/categories';
 
@@ -24,17 +26,15 @@ function formatDateTime(value) {
 
 export default function CategoryTable() {
   const [form] = Form.useForm();
-  const [editForm] = Form.useForm();
   const { notification, modal } = App.useApp();
+  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('Newest');
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
 
   const loadCategories = async () => {
     try {
@@ -90,13 +90,23 @@ export default function CategoryTable() {
     setIsAddModalOpen(true);
   };
 
-  const openEditModal = (category) => {
-    setEditingCategory(category);
-    editForm.setFieldsValue({
-      name: category.name,
-      slug: category.slug,
-    });
-    setIsEditModalOpen(true);
+  const handleCancelAdd = () => {
+    if (form.isFieldsTouched()) {
+      modal.confirm({
+        title: 'Hủy thêm danh mục?',
+        content: 'Dữ liệu đã nhập sẽ bị mất. Bạn có chắc muốn hủy không?',
+        okText: 'Hủy thêm',
+        cancelText: 'Tiếp tục nhập',
+        okButtonProps: { danger: true },
+        onOk: () => {
+          setIsAddModalOpen(false);
+          form.resetFields();
+        },
+      });
+    } else {
+      setIsAddModalOpen(false);
+      form.resetFields();
+    }
   };
 
   const handleAddCategory = async () => {
@@ -139,55 +149,6 @@ export default function CategoryTable() {
     } catch (error) {
       notification.error({
         title: 'Thêm danh mục thất bại',
-        description: error instanceof Error ? error.message : 'Vui lòng kiểm tra lại dữ liệu danh mục và thử lại.',
-        placement: 'topRight',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleUpdateCategory = async () => {
-    if (!editingCategory) return;
-
-    try {
-      const values = await editForm.validateFields();
-      setIsSubmitting(true);
-
-      const payload = {
-        ...editingCategory,
-        name: values.name.trim(),
-        slug: slugify(values.slug),
-        updated_at: new Date().toISOString(),
-      };
-
-      const response = await fetch(`${CATEGORY_API_URL}/${editingCategory.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error('Không thể cập nhật danh mục trong db.json.');
-      }
-
-      const updatedCategory = await response.json();
-      setCategories((prev) =>
-        prev.map((category) => (String(category.id) === String(updatedCategory.id) ? updatedCategory : category))
-      );
-
-      notification.success({
-        title: 'Cập nhật danh mục thành công',
-        description: `Danh mục "${updatedCategory.name}" đã được cập nhật.`,
-        placement: 'topRight',
-      });
-
-      setIsEditModalOpen(false);
-      setEditingCategory(null);
-      editForm.resetFields();
-    } catch (error) {
-      notification.error({
-        title: 'Cập nhật danh mục thất bại',
         description: error instanceof Error ? error.message : 'Vui lòng kiểm tra lại dữ liệu danh mục và thử lại.',
         placement: 'topRight',
       });
@@ -239,20 +200,16 @@ export default function CategoryTable() {
           <p className="text-xs font-semibold text-[#6160DC] mt-0.5">Manage product categories</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button type="primary" onClick={openAddModal} className="!h-[38px] !rounded-lg !bg-[#6160DC] hover:!bg-[#5756c5]">
-            + Add Category
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={openAddModal}
+            className="!h-[38px] !rounded-lg !bg-[#6160DC] hover:!bg-[#5756c5]"
+          >
+            Add Category
           </Button>
           <div className="relative">
-            <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            <SearchOutlined className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
               type="text"
               placeholder="Search"
@@ -301,13 +258,18 @@ export default function CategoryTable() {
                   <td className="py-3.5 pr-4 text-sm text-gray-600 whitespace-nowrap">{formatDateTime(category.created_at)}</td>
                   <td className="py-3.5 pr-4 text-sm text-gray-600 whitespace-nowrap">{formatDateTime(category.updated_at)}</td>
                   <td className="py-3.5 pr-4">
-                    <div className="flex items-center gap-2">
-                      <Button size="small" type="default" onClick={() => openEditModal(category)}>
-                        Edit
-                      </Button>
-                      <Button size="small" danger onClick={() => handleDeleteCategory(category)}>
-                        Delete
-                      </Button>
+                    <div className="flex items-center gap-1.5">
+                      <Tooltip title="Chỉnh sửa">
+                        <Button
+                          size="small"
+                          icon={<EditOutlined />}
+                          onClick={() => navigate(`/category/edit/${category.id}`)}
+                          className="!text-[#6160DC] !border-[#d0d0f7] !bg-[#efefff] hover:!bg-[#e3e3ff]"
+                        />
+                      </Tooltip>
+                      <Tooltip title="Xóa">
+                        <Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleDeleteCategory(category)} />
+                      </Tooltip>
                     </div>
                   </td>
                 </tr>
@@ -320,7 +282,7 @@ export default function CategoryTable() {
       <Modal
         title="Add New Category"
         open={isAddModalOpen}
-        onCancel={() => setIsAddModalOpen(false)}
+        onCancel={handleCancelAdd}
         onOk={handleAddCategory}
         okText="Add Category"
         cancelText="Cancel"
@@ -374,69 +336,6 @@ export default function CategoryTable() {
         </Form>
       </Modal>
 
-      <Modal
-        title="Edit Category"
-        open={isEditModalOpen}
-        onCancel={() => {
-          setIsEditModalOpen(false);
-          setEditingCategory(null);
-        }}
-        onOk={handleUpdateCategory}
-        okText="Save"
-        cancelText="Cancel"
-        confirmLoading={isSubmitting}
-      >
-        <Form form={editForm} layout="vertical" requiredMark="optional">
-          <Form.Item
-            label="Category Name"
-            name="name"
-            rules={[
-              { required: true, message: 'Please enter category name' },
-              { min: 2, message: 'Category name must be at least 2 characters' },
-              { max: 100, message: 'Category name must be at most 100 characters' },
-              {
-                validator: (_, value) => {
-                  if (!value) return Promise.resolve();
-                  const duplicated = categories.some(
-                    (category) =>
-                      category.name.toLowerCase() === value.trim().toLowerCase() &&
-                      String(category.id) !== String(editingCategory?.id)
-                  );
-                  return duplicated ? Promise.reject(new Error('Category name already exists')) : Promise.resolve();
-                },
-              },
-            ]}
-          >
-            <Input placeholder="Laptop" />
-          </Form.Item>
-
-          <Form.Item
-            label="Slug"
-            name="slug"
-            normalize={(value) => slugify(value)}
-            rules={[
-              { required: true, message: 'Please enter slug' },
-              {
-                pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-                message: 'Slug chỉ gồm chữ cái, số và dấu gạch ngang',
-              },
-              {
-                validator: (_, value) => {
-                  if (!value) return Promise.resolve();
-                  const duplicated = categories.some(
-                    (category) =>
-                      category.slug.toLowerCase() === value.toLowerCase() &&
-                      String(category.id) !== String(editingCategory?.id)
-                  );
-                  return duplicated ? Promise.reject(new Error('Slug already exists')) : Promise.resolve();
-                },
-              },
-            ]}
-          >
-            <Input placeholder="vd: dien-thoai-cao-cap" />
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 }

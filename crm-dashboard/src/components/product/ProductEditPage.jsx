@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { App, Button, Form, Input, InputNumber, Select, Spin } from 'antd';
+import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const PRODUCT_API_URL = 'http://localhost:3001/products';
@@ -7,13 +8,29 @@ const CATEGORY_API_URL = 'http://localhost:3001/categories';
 
 export default function ProductEditPage() {
   const [form] = Form.useForm();
-  const { notification } = App.useApp();
+  const { notification, modal } = App.useApp();
   const navigate = useNavigate();
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [product, setProduct] = useState(null);
   const [categoryOptions, setCategoryOptions] = useState([]);
+  const [isFormDirty, setIsFormDirty] = useState(false);
+
+  const handleBack = () => {
+    if (isFormDirty) {
+      modal.confirm({
+        title: 'Bỏ thay đổi?',
+        content: 'Bạn có thay đổi chưa được lưu. Rời khỏi trang sẽ mất toàn bộ chỉnh sửa.',
+        okText: 'Rời khỏi',
+        cancelText: 'Ở lại',
+        okButtonProps: { danger: true },
+        onOk: () => navigate('/product'),
+      });
+    } else {
+      navigate('/product');
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -99,6 +116,7 @@ export default function ProductEditPage() {
         throw new Error('Không thể cập nhật sản phẩm.');
       }
 
+      setIsFormDirty(false);
       notification.success({
         title: 'Cập nhật sản phẩm thành công',
         description: `Sản phẩm "${payload.name}" đã được cập nhật.`,
@@ -140,10 +158,10 @@ export default function ProductEditPage() {
 
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-lg font-bold text-gray-800">Edit Product #{product.id}</h2>
-        <Button onClick={() => navigate('/product')}>Back</Button>
+        <Button icon={<ArrowLeftOutlined />} onClick={handleBack}>Back</Button>
       </div>
 
-      <Form form={form} layout="vertical" requiredMark="optional">
+      <Form form={form} layout="vertical" requiredMark="optional" onValuesChange={() => setIsFormDirty(true)}>
         <Form.Item
           label="Product Name"
           name="name"
@@ -215,10 +233,10 @@ export default function ProductEditPage() {
         </Form.Item>
 
         <div className="flex items-center gap-3">
-          <Button type="primary" loading={isSubmitting} onClick={handleSave}>
+          <Button type="primary" icon={<SaveOutlined />} loading={isSubmitting} onClick={handleSave}>
             Save Product
           </Button>
-          <Button onClick={() => navigate('/product')}>Cancel</Button>
+          <Button icon={<ArrowLeftOutlined />} onClick={handleBack}>Cancel</Button>
         </div>
       </Form>
     </div>

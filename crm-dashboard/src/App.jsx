@@ -1,10 +1,12 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import StatsCard from './components/StatsCard';
-import CustomerTable from './components/CustomerTable';
-import ProductTable from './components/ProductTable';
-import CategoryTable from './components/CategoryTable';
-import ProductEditPage from './components/ProductEditPage';
+import Sidebar from './components/layout/Sidebar';
+import StatsCard from './components/shared/StatsCard';
+import CustomerTable from './components/customer/CustomerTable';
+import ProductTable from './components/product/ProductTable';
+import ProductDetailPage from './components/product/ProductDetailPage';
+import ProductEditPage from './components/product/ProductEditPage';
+import CategoryTable from './components/category/CategoryTable';
+import CategoryEditPage from './components/category/CategoryEditPage';
 
 const avatarUrls = [
   'https://i.pravatar.cc/28?img=1',
@@ -73,10 +75,14 @@ function DashboardLayout() {
 
   if (path.startsWith('/product/edit/')) {
     pageTitle = 'Edit Product';
+  } else if (path.match(/^\/product\/\d+$/)) {
+    pageTitle = 'Product Detail';
   } else if (path.startsWith('/product')) {
     pageTitle = 'Product Management';
   } else if (path.startsWith('/customers')) {
     pageTitle = 'Customers Management';
+  } else if (path.startsWith('/category/edit/')) {
+    pageTitle = 'Edit Category';
   } else if (path.startsWith('/category')) {
     pageTitle = 'Category Management';
   }
@@ -126,8 +132,10 @@ export default function App() {
         <Route path="/" element={<Navigate to="/product" replace />} />
         <Route path="/product" element={<ProductTable />} />
         <Route path="/product/edit/:id" element={<ProductEditPage />} />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route path="/customers" element={<CustomerTable />} />
         <Route path="/category" element={<CategoryTable />} />
+        <Route path="/category/edit/:id" element={<CategoryEditPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/product" replace />} />
     </Routes>
