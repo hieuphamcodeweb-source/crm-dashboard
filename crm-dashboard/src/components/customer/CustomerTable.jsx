@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { App as AntdApp, Button, Form, Input, Modal, Select } from 'antd';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 
 const CUSTOMER_API_URL = 'http://localhost:3001/customers';
 
@@ -20,7 +21,7 @@ function StatusBadge({ status }) {
 
 export default function CustomerTable() {
   const [form] = Form.useForm();
-  const { notification } = AntdApp.useApp();
+  const { notification, modal } = AntdApp.useApp();
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('Newest');
@@ -105,6 +106,25 @@ export default function CustomerTable() {
     setIsAddModalOpen(true);
   };
 
+  const handleCancelAdd = () => {
+    if (form.isFieldsTouched()) {
+      modal.confirm({
+        title: 'Hủy thêm khách hàng?',
+        content: 'Dữ liệu đã nhập sẽ bị mất. Bạn có chắc muốn hủy không?',
+        okText: 'Hủy thêm',
+        cancelText: 'Tiếp tục nhập',
+        okButtonProps: { danger: true },
+        onOk: () => {
+          setIsAddModalOpen(false);
+          form.resetFields();
+        },
+      });
+    } else {
+      setIsAddModalOpen(false);
+      form.resetFields();
+    }
+  };
+
   const handleAddCustomer = async () => {
     try {
       const values = await form.validateFields();
@@ -156,18 +176,17 @@ export default function CustomerTable() {
           <p className="text-xs font-semibold text-[#6160DC] mt-0.5">Active Members</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button type="primary" onClick={openAddModal} className="!h-[38px] !rounded-lg !bg-[#6160DC] hover:!bg-[#5756c5]">
-            + Add Customer
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={openAddModal}
+            className="!h-[38px] !rounded-lg !bg-[#6160DC] hover:!bg-[#5756c5]"
+          >
+            Add Customer
           </Button>
           {/* Search */}
           <div className="relative">
-            <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            <SearchOutlined className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
               type="text"
               placeholder="Search"
@@ -289,7 +308,7 @@ export default function CustomerTable() {
       <Modal
         title="Add New Customer"
         open={isAddModalOpen}
-        onCancel={() => setIsAddModalOpen(false)}
+        onCancel={handleCancelAdd}
         onOk={handleAddCustomer}
         okText="Add Customer"
         cancelText="Cancel"

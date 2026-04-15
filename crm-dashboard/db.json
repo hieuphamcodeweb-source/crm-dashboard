@@ -24,7 +24,7 @@
       "category": "Headphone",
       "sku": "SONY-XM5",
       "price": 7990000,
-      "stock": 0,
+      "stock": 45,
       "status": "Inactive"
     },
     {
@@ -53,6 +53,56 @@
       "price": 800000,
       "stock": 1000,
       "status": "Active"
+    },
+    {
+      "id": "51CsWDx0Wwc",
+      "name": "Macbock",
+      "category": "Laptop",
+      "sku": "MDA-4",
+      "price": 21500000,
+      "stock": 25,
+      "status": "Active",
+      "created_at": "2026-04-15T02:12:11.767Z"
+    },
+    {
+      "id": "HtZ4dR-cU_g",
+      "name": "Alice Johnson",
+      "category": "Laptop",
+      "sku": "VVCV-7",
+      "price": 555555,
+      "stock": 20,
+      "status": "Active",
+      "created_at": "2026-04-15T02:19:10.632Z"
+    },
+    {
+      "id": "h2Mt6aOJD3A",
+      "name": "Jack Anderson",
+      "category": "Smartphone",
+      "sku": "LOGI-MXKS",
+      "price": 85458,
+      "stock": 28,
+      "status": "Active",
+      "created_at": "2026-04-15T02:19:34.215Z"
+    },
+    {
+      "id": "w6uaTUmnECQ",
+      "name": "Eva Martinez",
+      "category": "Phụ Kiện",
+      "sku": "LOGI-MXKS",
+      "price": 845457,
+      "stock": 68,
+      "status": "Active",
+      "created_at": "2026-04-15T02:19:50.739Z"
+    },
+    {
+      "id": "rJTcCBiBRxg",
+      "name": "Eva Martinez",
+      "category": "Table",
+      "sku": "LOGI-MXKS",
+      "price": 6875,
+      "stock": 12,
+      "status": "Active",
+      "created_at": "2026-04-15T02:20:17.069Z"
     }
   ],
   "customers": [
@@ -185,27 +235,6 @@
       "slug": "may-tinh-bang",
       "created_at": "2026-04-14T07:26:03.872Z",
       "updated_at": "2026-04-14T07:26:03.872Z"
-    },
-    {
-      "id": "HyvRuZmLBTM",
-      "name": "hieu",
-      "slug": "hieu",
-      "created_at": "2026-04-14T08:01:51.390Z",
-      "updated_at": "2026-04-14T08:20:01.116Z"
-    },
-    {
-      "id": "b05AHT2DSf4",
-      "name": "hieu",
-      "slug": "hieu2",
-      "created_at": "2026-04-14T08:32:21.519Z",
-      "updated_at": "2026-04-14T08:32:21.519Z"
-    },
-    {
-      "id": "YOF_NQsD7WA",
-      "name": "Bui Thi R",
-      "slug": "hieu4",
-      "created_at": "2026-04-14T08:37:31.551Z",
-      "updated_at": "2026-04-14T08:37:31.551Z"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
