@@ -1,4 +1,5 @@
-import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { SearchOutlined } from '@ant-design/icons';
 import Sidebar from './components/layout/Sidebar';
 import StatsCard from './components/shared/StatsCard';
 import CustomerTable from './components/customer/CustomerTable';
@@ -7,6 +8,15 @@ import ProductDetailPage from './components/product/ProductDetailPage';
 import ProductEditPage from './components/product/ProductEditPage';
 import CategoryTable from './components/category/CategoryTable';
 import CategoryEditPage from './components/category/CategoryEditPage';
+import OrderTable from './components/order/OrderTable';
+import ClientLayout from './client/layout/ClientLayout';
+import ClientHomePage from './client/pages/ClientHomePage';
+import ClientProductsPage from './client/pages/ClientProductsPage';
+import ClientProductDetailPage from './client/pages/ClientProductDetailPage';
+import CartPage from './client/pages/CartPage';
+import LoginPage from './client/pages/auth/LoginPage';
+import RegisterPage from './client/pages/auth/RegisterPage';
+import RequireClientAuth from './client/components/auth/RequireClientAuth';
 
 const avatarUrls = [
   'https://i.pravatar.cc/28?img=1',
@@ -56,59 +66,49 @@ const statsData = [
     extra: (
       <div className="flex -space-x-2">
         {avatarUrls.map((url, i) => (
-          <img
-            key={i}
-            src={url}
-            alt=""
-            className="w-6 h-6 rounded-full border-2 border-white object-cover"
-          />
+          <img key={i} src={url} alt="" className="w-6 h-6 rounded-full border-2 border-white object-cover" />
         ))}
       </div>
     ),
   },
 ];
 
-function DashboardLayout() {
+function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const path = location.pathname;
   let pageTitle = 'Dashboard';
 
-  if (path.startsWith('/product/edit/')) {
-    pageTitle = 'Edit Product';
-  } else if (path.match(/^\/product\/\d+$/)) {
-    pageTitle = 'Product Detail';
-  } else if (path.startsWith('/product')) {
-    pageTitle = 'Product Management';
-  } else if (path.startsWith('/customers')) {
-    pageTitle = 'Customers Management';
-  } else if (path.startsWith('/category/edit/')) {
-    pageTitle = 'Edit Category';
-  } else if (path.startsWith('/category')) {
-    pageTitle = 'Category Management';
-  }
+  if (path.startsWith('/admin/product/edit/')) pageTitle = 'Edit Product';
+  else if (path.match(/^\/admin\/product\/\d+$/)) pageTitle = 'Product Detail';
+  else if (path.startsWith('/admin/product')) pageTitle = 'Product Management';
+  else if (path.startsWith('/admin/customers')) pageTitle = 'Customers Management';
+  else if (path.startsWith('/admin/orders')) pageTitle = 'Order Management';
+  else if (path.startsWith('/admin/category/edit/')) pageTitle = 'Edit Category';
+  else if (path.startsWith('/admin/category')) pageTitle = 'Category Management';
 
   return (
     <div className="flex min-h-screen bg-[#f5f6fa]">
       <Sidebar />
-
-      {/* Main content */}
       <main className="flex-1 p-8 overflow-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-gray-800">{pageTitle}</h1>
-          <div className="relative">
-            <svg
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <SearchOutlined className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+              <input
+                type="text"
+                placeholder="Search"
+                className="pl-10 pr-5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6160DC]/30 w-64"
+              />
+            </div>
+            <button
+              onClick={() => navigate('/client')}
+              className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-xl hover:border-[#6160DC] hover:text-[#6160DC] transition-colors shadow-sm"
             >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search"
-              className="pl-10 pr-5 py-2.5 text-sm bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6160DC]/30 w-64"
-            />
+              Xem trang Client →
+            </button>
           </div>
         </div>
 
@@ -128,16 +128,35 @@ function DashboardLayout() {
 export default function App() {
   return (
     <Routes>
-      <Route element={<DashboardLayout />}>
-        <Route path="/" element={<Navigate to="/product" replace />} />
-        <Route path="/product" element={<ProductTable />} />
-        <Route path="/product/edit/:id" element={<ProductEditPage />} />
-        <Route path="/product/:id" element={<ProductDetailPage />} />
-        <Route path="/customers" element={<CustomerTable />} />
-        <Route path="/category" element={<CategoryTable />} />
-        <Route path="/category/edit/:id" element={<CategoryEditPage />} />
+      {/* Root redirect */}
+      <Route path="/" element={<Navigate to="/client" replace />} />
+
+      {/* ── ADMIN ── */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Navigate to="/admin/product" replace />} />
+        <Route path="product" element={<ProductTable />} />
+        <Route path="product/edit/:id" element={<ProductEditPage />} />
+        <Route path="product/:id" element={<ProductDetailPage />} />
+        <Route path="customers" element={<CustomerTable />} />
+        <Route path="orders" element={<OrderTable />} />
+        <Route path="category" element={<CategoryTable />} />
+        <Route path="category/edit/:id" element={<CategoryEditPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/product" replace />} />
+
+      {/* ── CLIENT ── */}
+      <Route path="/client" element={<ClientLayout />}>
+        <Route index element={<ClientHomePage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
+        <Route path="products" element={<ClientProductsPage />} />
+        <Route path="products/:id" element={<ClientProductDetailPage />} />
+        <Route element={<RequireClientAuth />}>
+          <Route path="cart" element={<CartPage />} />
+        </Route>
+      </Route>
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/client" replace />} />
     </Routes>
   );
 }

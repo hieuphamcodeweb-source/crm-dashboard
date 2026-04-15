@@ -263,7 +263,7 @@ export default function CategoryTable() {
                         <Button
                           size="small"
                           icon={<EditOutlined />}
-                          onClick={() => navigate(`/category/edit/${category.id}`)}
+                          onClick={() => navigate(`/admin/category/edit/${category.id}`)}
                           className="!text-[#6160DC] !border-[#d0d0f7] !bg-[#efefff] hover:!bg-[#e3e3ff]"
                         />
                       </Tooltip>

@@ -5,6 +5,7 @@ import {
   ShoppingOutlined,
   TeamOutlined,
   UnorderedListOutlined,
+  ShoppingCartOutlined,
   DollarOutlined,
   StarOutlined,
   QuestionCircleOutlined,
@@ -19,23 +20,35 @@ const navItems = [
   { label: 'Product', icon: <ShoppingOutlined />, hasArrow: true },
   { label: 'Customers', icon: <TeamOutlined />, hasArrow: true },
   { label: 'Category', icon: <UnorderedListOutlined />, hasArrow: true },
+  { label: 'Orders', icon: <ShoppingCartOutlined />, hasArrow: true },
   { label: 'Income', icon: <DollarOutlined />, hasArrow: true },
   { label: 'Promote', icon: <StarOutlined />, hasArrow: true },
   { label: 'Help', icon: <QuestionCircleOutlined />, hasArrow: true },
 ];
 
 const switchableRoutes = {
-  Product: '/product',
-  Customers: '/customers',
-  Category: '/category',
+  Product: '/admin/product',
+  Customers: '/admin/customers',
+  Category: '/admin/category',
+  Orders: '/admin/orders',
 };
 
 function isItemActive(itemLabel, pathname) {
   if (itemLabel === 'Product') {
-    return pathname === '/product' || pathname.startsWith('/product/edit/') || /^\/product\/\d+$/.test(pathname);
+    return (
+      pathname === '/admin/product' ||
+      pathname.startsWith('/admin/product/edit/') ||
+      /^\/admin\/product\/\d+$/.test(pathname)
+    );
   }
   if (itemLabel === 'Category') {
-    return pathname === '/category' || pathname.startsWith('/category/edit/');
+    return pathname === '/admin/category' || pathname.startsWith('/admin/category/edit/');
+  }
+  if (itemLabel === 'Customers') {
+    return pathname === '/admin/customers';
+  }
+  if (itemLabel === 'Orders') {
+    return pathname === '/admin/orders';
   }
   return switchableRoutes[itemLabel] === pathname;
 }
