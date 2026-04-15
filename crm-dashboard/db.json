@@ -34,7 +34,8 @@
       "sku": "LOGI-MXKS",
       "price": 2790000,
       "stock": 37,
-      "status": "Active"
+      "status": "Active",
+      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png"
     },
     {
       "id": "5",
@@ -43,7 +44,8 @@
       "sku": "SAM-T7-1TB",
       "price": 2490000,
       "stock": 8,
-      "status": "Active"
+      "status": "Active",
+      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233718/g0jpl9xzfx4981wsuzkz.png"
     },
     {
       "id": "GsZ_m_lLtuQ",
@@ -103,6 +105,28 @@
       "stock": 12,
       "status": "Active",
       "created_at": "2026-04-15T02:20:17.069Z"
+    },
+    {
+      "id": "BydoX9BagGg",
+      "name": "hieu",
+      "category": "Smartphone",
+      "sku": "LOGI-MXKS",
+      "price": 45523,
+      "stock": 12,
+      "status": "Active",
+      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233678/uzzclijqbbaoqlknpapx.png",
+      "created_at": "2026-04-15T06:14:43.098Z"
+    },
+    {
+      "id": "PXLYZwaDXjk",
+      "name": "Bui Thi R",
+      "category": "Phụ Kiện",
+      "sku": "LOGI-MXKS",
+      "price": 500000,
+      "stock": 24,
+      "status": "Active",
+      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png",
+      "created_at": "2026-04-15T06:58:35.748Z"
     }
   ],
   "customers": [
@@ -235,6 +259,158 @@
       "slug": "may-tinh-bang",
       "created_at": "2026-04-14T07:26:03.872Z",
       "updated_at": "2026-04-14T07:26:03.872Z"
+    }
+  ],
+  "users": [
+    {
+      "name": "hieu",
+      "email": "hieu@gmail.com",
+      "password": "123456",
+      "created_at": "2026-04-15T08:22:35.753Z",
+      "updated_at": "2026-04-15T08:22:35.753Z",
+      "id": "365njBNTOok"
+    },
+    {
+      "name": "hieu",
+      "email": "a@gmail.com",
+      "password": "000000",
+      "created_at": "2026-04-15T08:25:13.280Z",
+      "updated_at": "2026-04-15T08:25:13.280Z",
+      "id": "156bohFOW00"
+    },
+    {
+      "name": "Alice Johnson",
+      "email": "b@gmail.com",
+      "password": "123456",
+      "created_at": "2026-04-15T08:34:45.235Z",
+      "updated_at": "2026-04-15T08:34:45.235Z",
+      "id": "InChszn0aA4"
+    },
+    {
+      "name": "Eva Martinez",
+      "email": "e@gmail.com",
+      "password": "123456",
+      "created_at": "2026-04-15T08:38:22.432Z",
+      "updated_at": "2026-04-15T08:38:22.432Z",
+      "id": "xlyG2OIUQ5s"
+    }
+  ],
+  "carts": [
+    {
+      "id": "7habo8fKFB8",
+      "accountId": "156bohFOW00",
+      "accountName": "hieu",
+      "accountEmail": "a@gmail.com",
+      "items": [
+        {
+          "id": "4",
+          "name": "Logitech MX Keys S",
+          "category": "Keyboard",
+          "sku": "LOGI-MXKS",
+          "price": 2790000,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png",
+          "status": "Active",
+          "quantity": 1
+        }
+      ],
+      "updated_at": "2026-04-15T09:07:05.967Z",
+      "created_at": "2026-04-15T09:07:05.889Z"
+    }
+  ],
+  "orders": [
+    {
+      "code": "ORD-661019",
+      "accountId": "365njBNTOok",
+      "accountName": "hieu",
+      "accountEmail": "hieu@gmail.com",
+      "customer": {
+        "id": 1,
+        "name": "Nguyễn Văn An",
+        "phone": "0901 234 567",
+        "address": "123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh"
+      },
+      "items": [
+        {
+          "id": "4",
+          "name": "Logitech MX Keys S",
+          "category": "Keyboard",
+          "sku": "LOGI-MXKS",
+          "price": 2790000,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png",
+          "status": "Active",
+          "quantity": 1
+        }
+      ],
+      "itemCount": 1,
+      "subtotal": 2790000,
+      "discountCode": "none",
+      "discountRate": 0,
+      "discountAmount": 0,
+      "shippingMethod": {
+        "id": "standard",
+        "label": "Giao hàng tiêu chuẩn",
+        "desc": "3 – 5 ngày làm việc",
+        "fee": 0,
+        "icon": "📦"
+      },
+      "shippingFee": 0,
+      "paymentMethod": {
+        "id": "cod",
+        "label": "Thanh toán khi nhận hàng (COD)",
+        "icon": "💵"
+      },
+      "total": 2790000,
+      "status": "Pending",
+      "created_at": "2026-04-15T09:17:41.019Z",
+      "updated_at": "2026-04-15T09:21:33.397Z",
+      "id": "BJ9vismJQCM"
+    },
+    {
+      "code": "ORD-516785",
+      "accountId": "365njBNTOok",
+      "accountName": "hieu",
+      "accountEmail": "hieu@gmail.com",
+      "customer": {
+        "id": 4,
+        "name": "Phạm Thị Dung",
+        "phone": "0934 567 890",
+        "address": "321 Phan Chu Trinh, Phường Thạch Thang, Hải Châu, Đà Nẵng"
+      },
+      "items": [
+        {
+          "id": "1",
+          "name": "MacBook Air M4",
+          "category": "Laptop",
+          "sku": "MBA-M3-13",
+          "price": 32990000,
+          "img": "",
+          "status": "Active",
+          "quantity": 3
+        }
+      ],
+      "itemCount": 3,
+      "subtotal": 98970000,
+      "discountCode": "VIPCODE",
+      "discountRate": 0.25,
+      "discountAmount": 24742500,
+      "shippingMethod": {
+        "id": "sameday",
+        "label": "Hỏa tốc",
+        "desc": "2 – 4 giờ trong ngày",
+        "fee": 60000,
+        "icon": "⚡"
+      },
+      "shippingFee": 60000,
+      "paymentMethod": {
+        "id": "bank",
+        "label": "Chuyển khoản ngân hàng",
+        "icon": "🏦"
+      },
+      "total": 74287500,
+      "status": "Pending",
+      "created_at": "2026-04-15T09:31:56.785Z",
+      "updated_at": "2026-04-15T09:31:56.785Z",
+      "id": "S1_0MQuGHfM"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

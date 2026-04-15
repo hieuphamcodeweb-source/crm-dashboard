@@ -47,10 +47,10 @@ export default function CategoryEditPage() {
         okText: 'Rời khỏi',
         cancelText: 'Ở lại',
         okButtonProps: { danger: true },
-        onOk: () => navigate('/category'),
+        onOk: () => navigate('/admin/category'),
       });
     } else {
-      navigate('/category');
+      navigate('/admin/category');
     }
   };
 
@@ -109,7 +109,7 @@ export default function CategoryEditPage() {
         description: `Danh mục "${payload.name}" đã được cập nhật.`,
         placement: 'topRight',
       });
-      navigate('/category');
+      navigate('/admin/category');
     } catch (error) {
       notification.error({
         title: 'Cập nhật danh mục thất bại',
@@ -133,7 +133,7 @@ export default function CategoryEditPage() {
     return (
       <div className="bg-white rounded-2xl p-8 shadow-sm">
         <p className="text-sm text-red-500 mb-4">Không tìm thấy danh mục.</p>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/category')}>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/category')}>
           Quay lại
         </Button>
       </div>

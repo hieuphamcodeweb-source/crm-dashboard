@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { App, Button, Form, Input, InputNumber, Select, Spin } from 'antd';
 import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
+import ProductImage from '../shared/ProductImage';
 
 const PRODUCT_API_URL = 'http://localhost:3001/products';
 const CATEGORY_API_URL = 'http://localhost:3001/categories';
@@ -16,6 +17,7 @@ export default function ProductEditPage() {
   const [product, setProduct] = useState(null);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [isFormDirty, setIsFormDirty] = useState(false);
+  const [previewImg, setPreviewImg] = useState('');
 
   const handleBack = () => {
     if (isFormDirty) {
@@ -25,10 +27,10 @@ export default function ProductEditPage() {
         okText: 'Rời khỏi',
         cancelText: 'Ở lại',
         okButtonProps: { danger: true },
-        onOk: () => navigate('/product'),
+        onOk: () => navigate('/admin/product'),
       });
     } else {
-      navigate('/product');
+      navigate('/admin/product');
     }
   };
 
@@ -59,7 +61,9 @@ export default function ProductEditPage() {
             price: productData.price,
             stock: productData.stock,
             status: productData.status,
+            img: productData.img || '',
           });
+          setPreviewImg(productData.img || '');
           if (Array.isArray(categoryData)) {
             const seen = new Set();
             setCategoryOptions(
@@ -122,7 +126,7 @@ export default function ProductEditPage() {
         description: `Sản phẩm "${payload.name}" đã được cập nhật.`,
         placement: 'topRight',
       });
-      navigate('/product');
+      navigate('/admin/product');
     } catch (error) {
       notification.error({
         title: 'Cập nhật sản phẩm thất bại',
@@ -148,7 +152,7 @@ export default function ProductEditPage() {
       <div className="bg-white rounded-2xl p-8 shadow-sm">
   
         <p className="text-sm text-red-500 mb-4">Không tìm thấy sản phẩm.</p>
-        <Button onClick={() => navigate('/product')}>Back to Product</Button>
+        <Button onClick={() => navigate('/admin/product')}>Back to Product</Button>
       </div>
     );
   }
@@ -161,7 +165,15 @@ export default function ProductEditPage() {
         <Button icon={<ArrowLeftOutlined />} onClick={handleBack}>Back</Button>
       </div>
 
-      <Form form={form} layout="vertical" requiredMark="optional" onValuesChange={() => setIsFormDirty(true)}>
+      <Form
+        form={form}
+        layout="vertical"
+        requiredMark="optional"
+        onValuesChange={(changed) => {
+          setIsFormDirty(true);
+          if ('img' in changed) setPreviewImg(changed.img || '');
+        }}
+      >
         <Form.Item
           label="Product Name"
           name="name"
@@ -231,6 +243,25 @@ export default function ProductEditPage() {
             ]}
           />
         </Form.Item>
+
+          <Form.Item
+            label="Hình ảnh (URL)"
+            name="img"
+            rules={[{ type: 'url', message: 'Vui lòng nhập URL hợp lệ' }]}
+          >
+            <Input placeholder="https://example.com/product.jpg" allowClear />
+          </Form.Item>
+          {previewImg && (
+            <div className="mb-4">
+              <p className="text-xs text-gray-400 mb-1.5">Xem trước:</p>
+              <ProductImage
+                src={previewImg}
+                alt="preview"
+                className="w-full h-48 rounded-xl border border-gray-100"
+                iconSize="text-5xl"
+              />
+            </div>
+          )}
 
         <div className="flex items-center gap-3">
           <Button type="primary" icon={<SaveOutlined />} loading={isSubmitting} onClick={handleSave}>

@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { App, Button, Form, Input, InputNumber, Modal, Select, Tooltip } from 'antd';
 import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import ProductImage from '../shared/ProductImage';
 
 const PRODUCT_API_URL = 'http://localhost:3001/products';
 const CATEGORY_API_URL = 'http://localhost:3001/categories';
+const PAGE_SIZE = 10;
 
 function ProductStatusBadge({ status }) {
   if (status === 'Active') {
@@ -24,6 +26,8 @@ function ProductStatusBadge({ status }) {
 export default function ProductTable() {
   const [form] = Form.useForm();
   const { notification, modal } = App.useApp();
+  const [previewImg, setPreviewImg] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
@@ -82,6 +86,11 @@ export default function ProductTable() {
     return () => { isMounted = false; };
   }, []);
 
+  // Reset về trang 1 khi search hoặc sort thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortBy]);
+
   const filteredProducts = useMemo(() => {
     const matched = products.filter(
       (p) =>
@@ -98,9 +107,27 @@ export default function ProductTable() {
     );
   }, [products, search, sortBy]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+
+  const pagedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredProducts.slice(start, start + PAGE_SIZE);
+  }, [filteredProducts, currentPage]);
+
+  // Tạo dãy số trang để hiển thị (tối đa 5 trang xung quanh trang hiện tại)
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const pages = new Set([1, totalPages, currentPage]);
+    for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+      if (i > 0 && i <= totalPages) pages.add(i);
+    }
+    return [...pages].sort((a, b) => a - b);
+  }, [totalPages, currentPage]);
+
   const openAddModal = () => {
     form.resetFields();
     form.setFieldValue('status', 'Active');
+    setPreviewImg('');
     setIsAddModalOpen(true);
   };
 
@@ -112,11 +139,12 @@ export default function ProductTable() {
         okText: 'Hủy thêm',
         cancelText: 'Tiếp tục nhập',
         okButtonProps: { danger: true },
-        onOk: () => { setIsAddModalOpen(false); form.resetFields(); },
+        onOk: () => { setIsAddModalOpen(false); form.resetFields(); setPreviewImg(''); },
       });
     } else {
       setIsAddModalOpen(false);
       form.resetFields();
+      setPreviewImg('');
     }
   };
 
@@ -147,6 +175,8 @@ export default function ProductTable() {
       });
       setIsAddModalOpen(false);
       form.resetFields();
+      setPreviewImg('');
+      setCurrentPage(1);
     } catch {
       notification.error({
         title: 'Dữ liệu chưa hợp lệ',
@@ -234,14 +264,22 @@ export default function ProductTable() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                {['Product Name', 'Category', 'SKU', 'Price', 'Stock', 'Status', 'Actions'].map((h) => (
+                {['', 'Product Name', 'Category', 'SKU', 'Price', 'Stock', 'Status', 'Actions'].map((h) => (
                   <th key={h} className="pb-3 text-left text-xs font-medium text-gray-400 pr-4 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map((product) => (
+              {pagedProducts.map((product) => (
                 <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
+                  <td className="py-2 pr-3 w-10">
+                    <ProductImage
+                      src={product.img}
+                      alt={product.name}
+                      className="w-10 h-10 rounded-lg"
+                      iconSize="text-lg"
+                    />
+                  </td>
                   <td className="py-3.5 pr-4 text-sm font-medium text-gray-800 whitespace-nowrap">{product.name}</td>
                   <td className="py-3.5 pr-4 text-sm text-gray-600">{product.category}</td>
                   <td className="py-3.5 pr-4 text-sm text-gray-600">{product.sku}</td>
@@ -258,7 +296,7 @@ export default function ProductTable() {
                         <Button
                           size="small"
                           icon={<EyeOutlined />}
-                          onClick={() => navigate(`/product/${product.id}`)}
+                          onClick={() => navigate(`/admin/product/${product.id}`)}
                           className="!text-blue-500 !border-blue-200 !bg-blue-50 hover:!bg-blue-100"
                         />
                       </Tooltip>
@@ -266,7 +304,7 @@ export default function ProductTable() {
                         <Button
                           size="small"
                           icon={<EditOutlined />}
-                          onClick={() => navigate(`/product/edit/${product.id}`)}
+                          onClick={() => navigate(`/admin/product/edit/${product.id}`)}
                           className="!text-[#6160DC] !border-[#d0d0f7] !bg-[#efefff] hover:!bg-[#e3e3ff]"
                         />
                       </Tooltip>
@@ -287,6 +325,65 @@ export default function ProductTable() {
         )}
       </div>
 
+      {/* Pagination footer */}
+      {!isLoading && !fetchError && filteredProducts.length > 0 && (
+        <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
+          <p className="text-xs text-gray-400">
+            Hiển thị{' '}
+            <span className="font-semibold text-gray-600">
+              {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredProducts.length)}
+            </span>{' '}
+            / <span className="font-semibold text-gray-600">{filteredProducts.length}</span> sản phẩm
+          </p>
+
+          <div className="flex items-center gap-1">
+            {/* Prev */}
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+
+            {/* Page numbers */}
+            {pageNumbers.map((page, idx) => {
+              const prev = pageNumbers[idx - 1];
+              return (
+                <span key={page} className="flex items-center gap-1">
+                  {prev && page - prev > 1 && (
+                    <span className="text-gray-300 text-xs px-0.5">…</span>
+                  )}
+                  <button
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
+                      currentPage === page
+                        ? 'bg-[#6160DC] text-white shadow-sm'
+                        : 'text-gray-500 hover:bg-gray-100'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                </span>
+              );
+            })}
+
+            {/* Next */}
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       <Modal
         title="Add New Product"
         open={isAddModalOpen}
@@ -295,7 +392,14 @@ export default function ProductTable() {
         okText="Add Product"
         cancelText="Cancel"
       >
-        <Form form={form} layout="vertical" requiredMark="optional">
+        <Form
+          form={form}
+          layout="vertical"
+          requiredMark="optional"
+          onValuesChange={(changed) => {
+            if ('img' in changed) setPreviewImg(changed.img || '');
+          }}
+        >
           <Form.Item label="Product Name" name="name" rules={[
             { required: true, message: 'Please enter product name' },
             { min: 2, message: 'Product name must be at least 2 characters' },
@@ -326,6 +430,24 @@ export default function ProductTable() {
           <Form.Item label="Status" name="status" rules={[{ required: true, message: 'Please select status' }]}>
             <Select options={[{ label: 'Active', value: 'Active' }, { label: 'Inactive', value: 'Inactive' }]} />
           </Form.Item>
+          <Form.Item
+            label="Hình ảnh (URL)"
+            name="img"
+            rules={[{ type: 'url', message: 'Vui lòng nhập URL hợp lệ' }]}
+          >
+            <Input placeholder="https://example.com/product.jpg" allowClear />
+          </Form.Item>
+          {previewImg && (
+            <div className="mb-3">
+              <p className="text-xs text-gray-400 mb-1.5">Xem trước:</p>
+              <ProductImage
+                src={previewImg}
+                alt="preview"
+                className="w-full h-40 rounded-xl border border-gray-100"
+                iconSize="text-4xl"
+              />
+            </div>
+          )}
         </Form>
       </Modal>
     </div>
