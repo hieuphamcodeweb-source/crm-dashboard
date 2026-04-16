@@ -152,7 +152,14 @@ export default function ProductTable() {
     try {
       const values = await form.validateFields();
       const maxId = products.reduce((max, p) => Math.max(max, Number(p.id) || 0), 0);
-      const newProduct = { id: maxId + 1, ...values, sku: values.sku.toUpperCase(), created_at: new Date().toISOString() };
+      const normalizedStock = values.status === 'Inactive' ? 0 : values.stock;
+      const newProduct = {
+        id: maxId + 1,
+        ...values,
+        stock: normalizedStock,
+        sku: values.sku.toUpperCase(),
+        created_at: new Date().toISOString(),
+      };
       try {
         const response = await fetch(PRODUCT_API_URL, {
           method: 'POST',
@@ -213,6 +220,20 @@ export default function ProductTable() {
       },
     });
   };
+
+  const imageUrlRules = [
+    { required: true, message: 'Vui lòng nhập URL hình ảnh' },
+    { type: 'url', message: 'Vui lòng nhập URL hợp lệ (http/https)' },
+    {
+      validator: (_, value) => {
+        if (!value) return Promise.resolve();
+        const hasImageExtension = /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(value);
+        const isCloudinaryLike = /res\.cloudinary\.com/i.test(value);
+        if (hasImageExtension || isCloudinaryLike) return Promise.resolve();
+        return Promise.reject(new Error('URL ảnh phải là định dạng ảnh phổ biến (png, jpg, jpeg, webp, svg, gif)'));
+      },
+    },
+  ];
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -398,6 +419,12 @@ export default function ProductTable() {
           requiredMark="optional"
           onValuesChange={(changed) => {
             if ('img' in changed) setPreviewImg(changed.img || '');
+            if (changed.status === 'Inactive') {
+              form.setFieldValue('stock', 0);
+            }
+            if ('status' in changed || 'stock' in changed) {
+              form.validateFields(['stock']).catch(() => {});
+            }
           }}
         >
           <Form.Item label="Product Name" name="name" rules={[
@@ -424,6 +451,15 @@ export default function ProductTable() {
           <Form.Item label="Stock" name="stock" rules={[
             { required: true, message: 'Please enter stock quantity' },
             { type: 'number', min: 0, message: 'Stock must be 0 or greater' },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                const status = getFieldValue('status');
+                if (status === 'Active' && Number(value) <= 0) {
+                  return Promise.reject(new Error('Stock phải lớn hơn 0 khi trạng thái là Active'));
+                }
+                return Promise.resolve();
+              },
+            }),
           ]}>
             <InputNumber className="!w-full" min={0} placeholder="24" />
           </Form.Item>
@@ -433,7 +469,7 @@ export default function ProductTable() {
           <Form.Item
             label="Hình ảnh (URL)"
             name="img"
-            rules={[{ type: 'url', message: 'Vui lòng nhập URL hợp lệ' }]}
+            rules={imageUrlRules}
           >
             <Input placeholder="https://example.com/product.jpg" allowClear />
           </Form.Item>
