@@ -17,6 +17,7 @@ import CartPage from './client/pages/CartPage';
 import LoginPage from './client/pages/auth/LoginPage';
 import RegisterPage from './client/pages/auth/RegisterPage';
 import RequireClientAuth from './client/components/auth/RequireClientAuth';
+import RequireAdminAuth from './client/components/auth/RequireAdminAuth';
 
 const avatarUrls = [
   'https://i.pravatar.cc/28?img=1',
@@ -132,15 +133,17 @@ export default function App() {
       <Route path="/" element={<Navigate to="/client" replace />} />
 
       {/* ── ADMIN ── */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<Navigate to="/admin/product" replace />} />
-        <Route path="product" element={<ProductTable />} />
-        <Route path="product/edit/:id" element={<ProductEditPage />} />
-        <Route path="product/:id" element={<ProductDetailPage />} />
-        <Route path="customers" element={<CustomerTable />} />
-        <Route path="orders" element={<OrderTable />} />
-        <Route path="category" element={<CategoryTable />} />
-        <Route path="category/edit/:id" element={<CategoryEditPage />} />
+      <Route path="/admin" element={<RequireAdminAuth />}>
+        <Route element={<AdminLayout />}>
+          <Route index element={<Navigate to="/admin/product" replace />} />
+          <Route path="product" element={<ProductTable />} />
+          <Route path="product/edit/:id" element={<ProductEditPage />} />
+          <Route path="product/:id" element={<ProductDetailPage />} />
+          <Route path="customers" element={<CustomerTable />} />
+          <Route path="orders" element={<OrderTable />} />
+          <Route path="category" element={<CategoryTable />} />
+          <Route path="category/edit/:id" element={<CategoryEditPage />} />
+        </Route>
       </Route>
 
       {/* ── CLIENT ── */}

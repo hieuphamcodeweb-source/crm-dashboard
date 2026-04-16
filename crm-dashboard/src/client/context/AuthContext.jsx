@@ -54,6 +54,8 @@ export function AuthProvider({ children }) {
       user,
       token,
       isAuthenticated: Boolean(user && token),
+      isAdmin: user?.role === 'admin',
+      isUser: user?.role === 'user',
       async register(payload) {
         const email = payload.email.trim().toLowerCase();
         const existingRes = await fetch(`${AUTH_API_URL}?email=${encodeURIComponent(email)}`);
@@ -70,6 +72,7 @@ export function AuthProvider({ children }) {
           name: payload.name.trim(),
           email,
           password: payload.password,
+          role: 'user',
           created_at: now,
           updated_at: now,
         };
@@ -89,6 +92,7 @@ export function AuthProvider({ children }) {
           id: savedUser.id,
           name: savedUser.name,
           email: savedUser.email,
+          role: savedUser.role || 'user',
         };
         const newToken = createFakeToken(safeUser);
         setUser(safeUser);
@@ -147,6 +151,7 @@ export function AuthProvider({ children }) {
           id: matched.id,
           name: matched.name,
           email: matched.email,
+          role: matched.role || 'user',
         };
         const newToken = createFakeToken(safeUser);
         setUser(safeUser);

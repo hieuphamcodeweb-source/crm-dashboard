@@ -6,6 +6,9 @@ const CART_API_URL = 'http://localhost:3001/carts';
 const CartContext = createContext(null);
 
 function normalizeProduct(product, quantity) {
+  const stock = Number(product.stock ?? 0);
+  const safeStock = Number.isFinite(stock) && stock >= 0 ? stock : 0;
+  const safeQty = Math.max(1, Math.min(Number(quantity || 1), safeStock || Number(quantity || 1)));
   return {
     id: product.id,
     name: product.name,
@@ -14,7 +17,8 @@ function normalizeProduct(product, quantity) {
     price: product.price,
     img: product.img || '',
     status: product.status,
-    quantity,
+    stock: safeStock,
+    quantity: safeQty,
   };
 }
 
@@ -23,8 +27,18 @@ function mergeCartItems(items = []) {
   items.forEach((item) => {
     const key = String(item.id);
     const prev = map.get(key);
+    const itemStock = Number(item.stock ?? 0);
+    const safeItemStock = Number.isFinite(itemStock) && itemStock >= 0 ? itemStock : 0;
+    const itemQty = Number(item.quantity || 0);
     if (prev) {
-      map.set(key, { ...prev, quantity: prev.quantity + Number(item.quantity || 0) });
+      const maxStock = Math.max(Number(prev.stock || 0), safeItemStock);
+      const nextQtyRaw = prev.quantity + itemQty;
+      const nextQty = maxStock > 0 ? Math.min(nextQtyRaw, maxStock) : nextQtyRaw;
+      map.set(key, {
+        ...prev,
+        stock: maxStock,
+        quantity: nextQty,
+      });
     } else {
       map.set(key, {
         id: item.id,
@@ -34,7 +48,8 @@ function mergeCartItems(items = []) {
         price: item.price,
         img: item.img || '',
         status: item.status,
-        quantity: Number(item.quantity || 0),
+        stock: safeItemStock,
+        quantity: safeItemStock > 0 ? Math.min(itemQty, safeItemStock) : itemQty,
       });
     }
   });
@@ -208,9 +223,12 @@ export function CartProvider({ children }) {
       const existing = prev.find((item) => String(item.id) === String(product.id));
       let nextItems = [];
       if (existing) {
+        const maxStock = Number(existing.stock ?? product.stock ?? 0);
+        const desiredQty = existing.quantity + Number(quantity || 0);
+        const boundedQty = maxStock > 0 ? Math.min(desiredQty, maxStock) : desiredQty;
         nextItems = prev.map((item) =>
           String(item.id) === String(product.id)
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, stock: Number(item.stock ?? product.stock ?? 0), quantity: boundedQty }
             : item
         );
       } else {
@@ -231,12 +249,16 @@ export function CartProvider({ children }) {
 
   const updateQuantity = (id, quantity) => {
     setCartItems((prev) => {
-      const nextItems =
-        quantity <= 0
-          ? prev.filter((item) => String(item.id) !== String(id))
-          : prev.map((item) =>
-              String(item.id) === String(id) ? { ...item, quantity } : item
-            );
+      const nextItems = prev
+        .map((item) => {
+          if (String(item.id) !== String(id)) return item;
+          const maxStock = Number(item.stock || 0);
+          const requested = Number(quantity || 0);
+          if (requested <= 0) return null;
+          const bounded = maxStock > 0 ? Math.min(requested, maxStock) : requested;
+          return { ...item, quantity: bounded };
+        })
+        .filter(Boolean);
       enqueueSync(nextItems);
       return nextItems;
     });

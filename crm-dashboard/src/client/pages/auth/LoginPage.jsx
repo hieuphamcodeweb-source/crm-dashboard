@@ -21,7 +21,8 @@ export default function LoginPage() {
         description: `Xin chào ${user.name}!`,
         placement: 'topRight',
       });
-      navigate(redirectTo, { replace: true });
+      const target = user.role === 'admin' ? '/admin' : redirectTo;
+      navigate(target, { replace: true });
     } catch (error) {
       notification.error({
         title: 'Đăng nhập thất bại',

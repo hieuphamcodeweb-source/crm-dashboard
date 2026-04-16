@@ -15,7 +15,7 @@ export default function RegisterPage() {
       await register(values);
       notification.success({
         title: 'Đăng ký thành công',
-        description: 'Tài khoản của bạn đã được tạo và đăng nhập tự động.',
+        description: 'Tài khoản user của bạn đã được tạo và đăng nhập tự động.',
         placement: 'topRight',
       });
       navigate('/client');
