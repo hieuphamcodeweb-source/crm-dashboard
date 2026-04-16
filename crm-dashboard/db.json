@@ -337,12 +337,14 @@
           "price": 32990000,
           "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305126/kck02ymmrjqo8va35odv.png",
           "status": "Active",
+
           "stock": 24,
           "quantity": 24
         }
       ],
       "updated_at": "2026-04-16T03:57:14.718Z",
       "created_at": "2026-04-16T03:56:19.826Z"
+
     }
   ],
   "orders": [
