@@ -24,6 +24,7 @@ export default function ClientProductDetailPage() {
   const [qty, setQty] = useState(1);
 
   const cartItem = cartItems.find((item) => String(item.id) === String(id));
+  const cartQty = Number(cartItem?.quantity || 0);
 
   useEffect(() => {
     let isMounted = true;
@@ -54,12 +55,46 @@ export default function ClientProductDetailPage() {
       navigate('/client/login', { state: { from: `/client/products/${id}` } });
       return;
     }
-    setQty(1);
+    if (product) {
+      const totalStock = Number(product.stock || 0);
+      const remaining = Math.max(0, totalStock - cartQty);
+      if (remaining <= 0) {
+        notification.warning({
+          title: 'Số lượng tồn kho đã đầy',
+          description: `Bạn đã có ${cartQty} sản phẩm này trong giỏ, đã đạt giới hạn tồn kho.`,
+          placement: 'topRight',
+        });
+        return;
+      }
+      setQty(Math.min(1, remaining) || 1);
+    } else {
+      setQty(1);
+    }
     setModalOpen(true);
   };
 
   const handleConfirmAdd = () => {
     if (!product) return;
+    const totalStock = Number(product.stock || 0);
+    const remaining = Math.max(0, totalStock - cartQty);
+    if (remaining <= 0) {
+      notification.warning({
+        title: 'Số lượng tồn kho đã đầy',
+        description: `Bạn đã có ${cartQty} sản phẩm này trong giỏ, không thể thêm nữa.`,
+        placement: 'topRight',
+      });
+      setModalOpen(false);
+      return;
+    }
+    if (qty > remaining) {
+      notification.warning({
+        title: 'Vượt quá số lượng tồn kho',
+        description: `Bạn chỉ có thể thêm tối đa ${remaining} sản phẩm nữa.`,
+        placement: 'topRight',
+      });
+      setQty(remaining);
+      return;
+    }
     addToCart(product, qty);
     setModalOpen(false);
     notification.success({
@@ -89,7 +124,11 @@ export default function ClientProductDetailPage() {
   }
 
   const isActive = product.status === 'Active';
-  const maxQty = product.stock || 99;
+  const totalStock = Number(product.stock || 0);
+  const remainingStock = Math.max(0, totalStock - cartQty);
+  const maxQty = remainingStock > 0 ? remainingStock : 1;
+  const isSoldOutByCart = isActive && remainingStock <= 0;
+  const disableAddButton = !isActive || isSoldOutByCart;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
@@ -158,16 +197,16 @@ export default function ClientProductDetailPage() {
           {/* Add to cart button */}
           <div className="flex gap-3">
             <button
-              disabled={!isActive}
+              disabled={disableAddButton}
               onClick={openAddModal}
               className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-sm font-bold transition-all ${
-                isActive
+                !disableAddButton
                   ? 'bg-[#6160DC] text-white hover:bg-[#5756c5] active:scale-[0.98]'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
             >
               <ShoppingCartOutlined />
-              {isActive ? 'Thêm vào giỏ hàng' : 'Hết hàng'}
+              {!isActive ? 'Hết hàng' : isSoldOutByCart ? 'Số sản phẩm đã đầy' : 'Thêm vào giỏ hàng'}
             </button>
 
             {cartItem && (
@@ -231,11 +270,14 @@ export default function ClientProductDetailPage() {
                   min={1}
                   max={maxQty}
                   value={qty}
-                  onChange={(v) => setQty(v || 1)}
+                  onChange={(v) => {
+                    const next = Number(v || 1);
+                    setQty(Math.max(1, Math.min(maxQty, next)));
+                  }}
                   controls={false}
                   className="!w-16 !text-center !text-xl !font-extrabold !border-0 !bg-transparent"
                 />
-                <p className="text-[11px] text-gray-400">còn {product.stock} sp</p>
+                <p className="text-[11px] text-gray-900">có thể thêm {remainingStock} sp</p>
               </div>
 
               <button
