@@ -34,8 +34,7 @@
       "sku": "LOGI-MXKS",
       "price": 2790000,
       "stock": 37,
-      "status": "Active",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png"
+      "status": "Active"
     },
     {
       "id": "5",
@@ -44,8 +43,7 @@
       "sku": "SAM-T7-1TB",
       "price": 2490000,
       "stock": 8,
-      "status": "Active",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233718/g0jpl9xzfx4981wsuzkz.png"
+      "status": "Active"
     },
     {
       "id": "GsZ_m_lLtuQ",
@@ -54,7 +52,8 @@
       "sku": "MU-1",
       "price": 800000,
       "stock": 1000,
-      "status": "Active"
+      "status": "Active",
+      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233718/g0jpl9xzfx4981wsuzkz.png"
     },
     {
       "id": "51CsWDx0Wwc",
@@ -105,28 +104,6 @@
       "stock": 12,
       "status": "Active",
       "created_at": "2026-04-15T02:20:17.069Z"
-    },
-    {
-      "id": "BydoX9BagGg",
-      "name": "hieu",
-      "category": "Smartphone",
-      "sku": "LOGI-MXKS",
-      "price": 45523,
-      "stock": 12,
-      "status": "Active",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233678/uzzclijqbbaoqlknpapx.png",
-      "created_at": "2026-04-15T06:14:43.098Z"
-    },
-    {
-      "id": "PXLYZwaDXjk",
-      "name": "Bui Thi R",
-      "category": "Phụ Kiện",
-      "sku": "LOGI-MXKS",
-      "price": 500000,
-      "stock": 24,
-      "status": "Active",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png",
-      "created_at": "2026-04-15T06:58:35.748Z"
     }
   ],
   "customers": [
@@ -295,28 +272,7 @@
       "id": "xlyG2OIUQ5s"
     }
   ],
-  "carts": [
-    {
-      "id": "7habo8fKFB8",
-      "accountId": "156bohFOW00",
-      "accountName": "hieu",
-      "accountEmail": "a@gmail.com",
-      "items": [
-        {
-          "id": "4",
-          "name": "Logitech MX Keys S",
-          "category": "Keyboard",
-          "sku": "LOGI-MXKS",
-          "price": 2790000,
-          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png",
-          "status": "Active",
-          "quantity": 1
-        }
-      ],
-      "updated_at": "2026-04-15T09:07:05.967Z",
-      "created_at": "2026-04-15T09:07:05.889Z"
-    }
-  ],
+  "carts": [],
   "orders": [
     {
       "code": "ORD-661019",
@@ -411,6 +367,63 @@
       "created_at": "2026-04-15T09:31:56.785Z",
       "updated_at": "2026-04-15T09:31:56.785Z",
       "id": "S1_0MQuGHfM"
+    },
+    {
+      "code": "ORD-116935",
+      "accountId": "156bohFOW00",
+      "accountName": "hieu",
+      "accountEmail": "a@gmail.com",
+      "customer": {
+        "id": 1,
+        "name": "Nguyễn Văn An",
+        "phone": "0901 234 567",
+        "address": "123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh"
+      },
+      "items": [
+        {
+          "id": "4",
+          "name": "Logitech MX Keys S",
+          "category": "Keyboard",
+          "sku": "LOGI-MXKS",
+          "price": 2790000,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png",
+          "status": "Active",
+          "quantity": 1
+        },
+        {
+          "id": "BydoX9BagGg",
+          "name": "hieu",
+          "category": "Smartphone",
+          "sku": "LOGI-MXKS",
+          "price": 45523,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233678/uzzclijqbbaoqlknpapx.png",
+          "status": "Active",
+          "quantity": 1
+        }
+      ],
+      "itemCount": 2,
+      "subtotal": 2835523,
+      "discountCode": "none",
+      "discountRate": 0,
+      "discountAmount": 0,
+      "shippingMethod": {
+        "id": "standard",
+        "label": "Giao hàng tiêu chuẩn",
+        "desc": "3 – 5 ngày làm việc",
+        "fee": 0,
+        "icon": "📦"
+      },
+      "shippingFee": 0,
+      "paymentMethod": {
+        "id": "cod",
+        "label": "Thanh toán khi nhận hàng (COD)",
+        "icon": "💵"
+      },
+      "total": 2835523,
+      "status": "Pending",
+      "created_at": "2026-04-16T01:48:36.935Z",
+      "updated_at": "2026-04-16T01:48:36.935Z",
+      "id": "wfic1-zZCM4"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
