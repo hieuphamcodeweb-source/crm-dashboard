@@ -34,8 +34,7 @@
       "sku": "LOGI-MXKS",
       "price": 2790000,
       "stock": 37,
-      "status": "Active",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png"
+      "status": "Active"
     },
     {
       "id": "5",
@@ -44,8 +43,7 @@
       "sku": "SAM-T7-1TB",
       "price": 2490000,
       "stock": 8,
-      "status": "Active",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233718/g0jpl9xzfx4981wsuzkz.png"
+      "status": "Active"
     },
     {
       "id": "GsZ_m_lLtuQ",
@@ -54,7 +52,8 @@
       "sku": "MU-1",
       "price": 800000,
       "stock": 1000,
-      "status": "Active"
+      "status": "Active",
+      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233718/g0jpl9xzfx4981wsuzkz.png"
     },
     {
       "id": "51CsWDx0Wwc",
@@ -105,28 +104,6 @@
       "stock": 12,
       "status": "Active",
       "created_at": "2026-04-15T02:20:17.069Z"
-    },
-    {
-      "id": "BydoX9BagGg",
-      "name": "hieu",
-      "category": "Smartphone",
-      "sku": "LOGI-MXKS",
-      "price": 45523,
-      "stock": 12,
-      "status": "Active",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233678/uzzclijqbbaoqlknpapx.png",
-      "created_at": "2026-04-15T06:14:43.098Z"
-    },
-    {
-      "id": "PXLYZwaDXjk",
-      "name": "Bui Thi R",
-      "category": "Phụ Kiện",
-      "sku": "LOGI-MXKS",
-      "price": 500000,
-      "stock": 24,
-      "status": "Active",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png",
-      "created_at": "2026-04-15T06:58:35.748Z"
     }
   ],
   "customers": [
