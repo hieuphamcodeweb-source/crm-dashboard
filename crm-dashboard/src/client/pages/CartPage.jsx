@@ -87,6 +87,9 @@ export default function CartPage() {
 
               {/* Quantity control */}
               <div className="flex items-center gap-2 flex-shrink-0">
+                {Number(item.stock) > 0 && (
+                  <span className="text-[11px] text-gray-400 mr-1">max {item.stock}</span>
+                )}
                 <button
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
                   className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 font-bold transition-colors"
@@ -98,7 +101,8 @@ export default function CartPage() {
                 </span>
                 <button
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 font-bold transition-colors"
+                  disabled={Number(item.stock) > 0 && item.quantity >= Number(item.stock)}
+                  className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   +
                 </button>

@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-export default function RequireClientAuth() {
+export default function RequireAdminAuth() {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
 
@@ -9,8 +9,8 @@ export default function RequireClientAuth() {
     return <Navigate to="/client/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (user?.role === 'admin') {
-    return <Navigate to="/admin" replace />;
+  if (user?.role !== 'admin') {
+    return <Navigate to="/client" replace />;
   }
 
   return <Outlet />;

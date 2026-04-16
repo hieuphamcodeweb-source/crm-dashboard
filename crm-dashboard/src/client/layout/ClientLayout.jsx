@@ -18,6 +18,7 @@ export default function ClientLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { cartCount } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
+  const canAccessAdmin = isAuthenticated && user?.role === 'admin';
 
   const isActive = (path) => {
     if (path === '/client') return location.pathname === '/client';
@@ -110,14 +111,16 @@ export default function ClientLayout() {
               </button>
             )}
 
-            <button
-              onClick={() => navigate('/admin')}
-              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 border border-gray-200 transition-colors"
-              title="Vào trang quản trị"
-            >
-              <SettingOutlined />
-              Admin
-            </button>
+            {canAccessAdmin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 border border-gray-200 transition-colors"
+                title="Vào trang quản trị"
+              >
+                <SettingOutlined />
+                Admin
+              </button>
+            )}
 
             {/* Mobile menu toggle */}
             <button
@@ -163,12 +166,14 @@ export default function ClientLayout() {
                 </span>
               )}
             </button>
-            <button
-              onClick={() => navigate('/admin')}
-              className="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-100"
-            >
-              <SettingOutlined className="mr-2" />Trang quản trị
-            </button>
+            {canAccessAdmin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-100"
+              >
+                <SettingOutlined className="mr-2" />Trang quản trị
+              </button>
+            )}
             {isAuthenticated ? (
               <button
                 onClick={() => { handleLogout(); setMenuOpen(false); }}
