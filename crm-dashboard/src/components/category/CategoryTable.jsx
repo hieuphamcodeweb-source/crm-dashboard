@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { App, Button, Form, Input, Modal, Tooltip } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
 const CATEGORY_API_URL = 'http://localhost:3001/categories';
+const POLLING_INTERVAL_MS = 5000;
+const REFETCH_OPTIONS = { cache: 'no-store' };
 
 function slugify(input = '') {
   return input
@@ -36,11 +38,13 @@ export default function CategoryTable() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async ({ silent = false } = {}) => {
     try {
-      setIsLoading(true);
+      if (!silent) {
+        setIsLoading(true);
+      }
       setFetchError('');
-      const response = await fetch(CATEGORY_API_URL);
+      const response = await fetch(CATEGORY_API_URL, REFETCH_OPTIONS);
       if (!response.ok) {
         throw new Error('Không thể tải danh mục. Hãy chạy json-server với npm run server.');
       }
@@ -49,15 +53,31 @@ export default function CategoryTable() {
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
       setFetchError(error instanceof Error ? error.message : 'Không thể tải danh mục.');
-      setCategories([]);
+      if (!silent) {
+        setCategories([]);
+      }
     } finally {
-      setIsLoading(false);
+      if (!silent) {
+        setIsLoading(false);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadCategories();
-  }, []);
+    const pollingId = window.setInterval(() => {
+      loadCategories({ silent: true });
+    }, POLLING_INTERVAL_MS);
+    const handleWindowFocus = () => {
+      loadCategories({ silent: true });
+    };
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.clearInterval(pollingId);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [loadCategories]);
 
   const filteredCategories = useMemo(() => {
     const matched = categories.filter(

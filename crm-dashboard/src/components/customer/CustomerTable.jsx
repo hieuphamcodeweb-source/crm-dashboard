@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { App as AntdApp, Button, Form, Input, Modal, Select, Tooltip } from 'antd';
 import { PlusOutlined, SearchOutlined, SwapOutlined } from '@ant-design/icons';
 
 const USER_API_URL = 'http://localhost:3001/users';
 const PAGE_SIZE = 8;
+const POLLING_INTERVAL_MS = 5000;
+const REFETCH_OPTIONS = { cache: 'no-store' };
 
 function RoleBadge({ role }) {
   if (role === 'admin') {
@@ -32,41 +34,47 @@ export default function CustomerTable() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadUsers() {
-      try {
+  const loadUsers = useCallback(async ({ silent = false } = {}) => {
+    try {
+      if (!silent) {
         setIsLoading(true);
-        setFetchError('');
-        const response = await fetch(USER_API_URL);
-        if (!response.ok) {
-          throw new Error('Cannot load user data');
-        }
+      }
+      setFetchError('');
+      const response = await fetch(USER_API_URL, REFETCH_OPTIONS);
+      if (!response.ok) {
+        throw new Error('Cannot load user data');
+      }
 
-        const data = await response.json();
-        if (isMounted) {
-          const loadedUsers = Array.isArray(data) ? data : [];
-          setUsers(loadedUsers);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setFetchError(error instanceof Error ? error.message : 'Cannot load user data');
-          setUsers([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+      const data = await response.json();
+      const loadedUsers = Array.isArray(data) ? data : [];
+      setUsers(loadedUsers);
+    } catch (error) {
+      setFetchError(error instanceof Error ? error.message : 'Cannot load user data');
+      if (!silent) {
+        setUsers([]);
+      }
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
       }
     }
+  }, []);
 
+  useEffect(() => {
     loadUsers();
+    const pollingId = window.setInterval(() => {
+      loadUsers({ silent: true });
+    }, POLLING_INTERVAL_MS);
+    const handleWindowFocus = () => {
+      loadUsers({ silent: true });
+    };
+    window.addEventListener('focus', handleWindowFocus);
 
     return () => {
-      isMounted = false;
+      window.clearInterval(pollingId);
+      window.removeEventListener('focus', handleWindowFocus);
     };
-  }, []);
+  }, [loadUsers]);
 
   useEffect(() => {
     setCurrentPage(1);

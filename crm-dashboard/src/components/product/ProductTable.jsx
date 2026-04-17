@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { App, Button, Form, Input, InputNumber, Modal, Select, Tooltip } from 'antd';
 import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,8 @@ import ProductImage from '../shared/ProductImage';
 const PRODUCT_API_URL = 'http://localhost:3001/products';
 const CATEGORY_API_URL = 'http://localhost:3001/categories';
 const PAGE_SIZE = 10;
+const POLLING_INTERVAL_MS = 5000;
+const REFETCH_OPTIONS = { cache: 'no-store' };
 
 function ProductStatusBadge({ status }) {
   if (status === 'Active') {
@@ -37,54 +39,70 @@ export default function ProductTable() {
   const [fetchError, setFetchError] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function loadProducts() {
-      try {
+  const loadProducts = useCallback(async ({ silent = false } = {}) => {
+    try {
+      if (!silent) {
         setIsLoading(true);
-        setFetchError('');
-        const response = await fetch(PRODUCT_API_URL);
-        if (!response.ok) throw new Error('Cannot load product data');
-        const data = await response.json();
-        if (isMounted) {
-          const loadedProducts = Array.isArray(data) ? data : [];
-          setProducts(loadedProducts);
-          const localCategories = [...new Set(loadedProducts.map((p) => p.category).filter(Boolean))];
-          setCategoryOptions(localCategories.map((name) => ({ label: name, value: name })));
-        }
-      } catch (error) {
-        if (isMounted) {
-          setFetchError(error instanceof Error ? error.message : 'Cannot load product data');
-          setProducts([]);
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
+      }
+      setFetchError('');
+      const response = await fetch(PRODUCT_API_URL, REFETCH_OPTIONS);
+      if (!response.ok) throw new Error('Cannot load product data');
+      const data = await response.json();
+      const loadedProducts = Array.isArray(data) ? data : [];
+      setProducts(loadedProducts);
+      const localCategories = [...new Set(loadedProducts.map((p) => p.category).filter(Boolean))];
+      setCategoryOptions(localCategories.map((name) => ({ label: name, value: name })));
+    } catch (error) {
+      setFetchError(error instanceof Error ? error.message : 'Cannot load product data');
+      if (!silent) {
+        setProducts([]);
+      }
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
       }
     }
-    loadProducts();
-    return () => { isMounted = false; };
+  }, []);
+
+  const loadCategories = useCallback(async () => {
+    try {
+      const response = await fetch(CATEGORY_API_URL, REFETCH_OPTIONS);
+      if (!response.ok) return;
+      const categories = await response.json();
+      if (Array.isArray(categories)) {
+        const seen = new Set();
+        setCategoryOptions(
+          categories
+            .filter((c) => { if (seen.has(c.name)) return false; seen.add(c.name); return true; })
+            .map((c) => ({ label: c.name, value: c.name }))
+        );
+      }
+    } catch {
+      // giữ options từ product data nếu fetch categories lỗi
+    }
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    async function loadCategories() {
-      try {
-        const response = await fetch(CATEGORY_API_URL);
-        if (!response.ok) return;
-        const categories = await response.json();
-        if (isMounted && Array.isArray(categories)) {
-          const seen = new Set();
-          setCategoryOptions(
-            categories
-              .filter((c) => { if (seen.has(c.name)) return false; seen.add(c.name); return true; })
-              .map((c) => ({ label: c.name, value: c.name }))
-          );
-        }
-      } catch { /* giữ options từ product data */ }
-    }
+    loadProducts();
     loadCategories();
-    return () => { isMounted = false; };
-  }, []);
+    const productPollingId = window.setInterval(() => {
+      loadProducts({ silent: true });
+    }, POLLING_INTERVAL_MS);
+    const categoryPollingId = window.setInterval(() => {
+      loadCategories();
+    }, POLLING_INTERVAL_MS);
+    const handleWindowFocus = () => {
+      loadProducts({ silent: true });
+      loadCategories();
+    };
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.clearInterval(productPollingId);
+      window.clearInterval(categoryPollingId);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [loadProducts, loadCategories]);
 
   // Reset về trang 1 khi search hoặc sort thay đổi
   useEffect(() => {

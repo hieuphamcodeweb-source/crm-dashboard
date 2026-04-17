@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRightOutlined, FireOutlined, SafetyOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import ProductImage from '../../components/shared/ProductImage';
 
 const ORDER_API_URL = 'http://localhost:3001/orders';
 const PRODUCT_API_URL = 'http://localhost:3001/products';
+const POLLING_INTERVAL_MS = 5000;
+const REFETCH_OPTIONS = { cache: 'no-store' };
 
 const highlights = [
   {
@@ -34,42 +36,49 @@ export default function ClientHomePage() {
   const [products, setProducts] = useState([]);
   const [isLoadingTop, setIsLoadingTop] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadData() {
-      try {
+  const loadData = useCallback(async ({ silent = false } = {}) => {
+    try {
+      if (!silent) {
         setIsLoadingTop(true);
-        const [orderRes, productRes] = await Promise.all([
-          fetch(ORDER_API_URL),
-          fetch(PRODUCT_API_URL),
-        ]);
-        if (!orderRes.ok) throw new Error('Cannot load orders');
-        const [orderData, productData] = await Promise.all([
-          orderRes.json(),
-          productRes.ok ? productRes.json() : Promise.resolve([]),
-        ]);
-        if (isMounted) {
-          setOrders(Array.isArray(orderData) ? orderData : []);
-          setProducts(Array.isArray(productData) ? productData : []);
-        }
-      } catch {
-        if (isMounted) {
-          setOrders([]);
-          setProducts([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingTop(false);
-        }
+      }
+      const [orderRes, productRes] = await Promise.all([
+        fetch(ORDER_API_URL, REFETCH_OPTIONS),
+        fetch(PRODUCT_API_URL, REFETCH_OPTIONS),
+      ]);
+      if (!orderRes.ok) throw new Error('Cannot load orders');
+      const [orderData, productData] = await Promise.all([
+        orderRes.json(),
+        productRes.ok ? productRes.json() : Promise.resolve([]),
+      ]);
+      setOrders(Array.isArray(orderData) ? orderData : []);
+      setProducts(Array.isArray(productData) ? productData : []);
+    } catch {
+      if (!silent) {
+        setOrders([]);
+        setProducts([]);
+      }
+    } finally {
+      if (!silent) {
+        setIsLoadingTop(false);
       }
     }
-
-    loadData();
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    loadData();
+    const pollingId = window.setInterval(() => {
+      loadData({ silent: true });
+    }, POLLING_INTERVAL_MS);
+    const handleWindowFocus = () => {
+      loadData({ silent: true });
+    };
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.clearInterval(pollingId);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [loadData]);
 
   const topSellingProducts = useMemo(() => {
     const productById = new Map(

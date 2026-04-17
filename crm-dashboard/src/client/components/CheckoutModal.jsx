@@ -9,7 +9,6 @@ import {
   GiftOutlined,
 } from '@ant-design/icons';
 import ProductImage from '../../components/shared/ProductImage';
-import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 const ORDER_API_URL = 'http://localhost:3001/orders';
@@ -57,10 +56,19 @@ function SectionTitle({ icon, title }) {
 
 // ── Main Component ──────────────────────────────────────────────────────────
 
-export default function CheckoutModal({ open, onClose }) {
+export default function CheckoutModal({
+  open,
+  onClose,
+  checkoutItems = [],
+  checkoutCount = 0,
+  checkoutTotal = 0,
+  onOrderSuccess,
+}) {
   const { notification } = App.useApp();
-  const { cartItems, cartTotal, cartCount, clearCart } = useCart();
   const { user } = useAuth();
+  const unavailableItems = checkoutItems.filter(
+    (item) => item.isPurchasable === false || item.status !== 'Active' || Number(item.stock || 0) <= 0
+  );
 
   const [addressId, setAddressId] = useState(ADDRESSES[0].id);
   const [shippingId, setShippingId] = useState('standard');
@@ -73,11 +81,29 @@ export default function CheckoutModal({ open, onClose }) {
   const selectedShipping = SHIPPING_METHODS.find((s) => s.id === shippingId);
   const selectedDiscount = DISCOUNT_CODES.find((d) => d.value === discountCode);
 
-  const discountAmount = Math.round(cartTotal * (selectedDiscount?.rate || 0));
+  const discountAmount = Math.round(checkoutTotal * (selectedDiscount?.rate || 0));
   const shippingFee = selectedShipping?.fee || 0;
-  const finalTotal = cartTotal - discountAmount + shippingFee;
+  const finalTotal = checkoutTotal - discountAmount + shippingFee;
 
   const handlePlaceOrder = async () => {
+    if (checkoutItems.length === 0) {
+      notification.warning({
+        title: 'Chưa có sản phẩm được chọn',
+        description: 'Vui lòng chọn ít nhất một sản phẩm trong giỏ hàng.',
+        placement: 'topRight',
+      });
+      return;
+    }
+
+    if (unavailableItems.length > 0) {
+      notification.warning({
+        title: 'Không thể đặt hàng',
+        description: 'Giỏ hàng đang có sản phẩm hết hàng. Vui lòng xóa sản phẩm đó trước khi thanh toán.',
+        placement: 'topRight',
+      });
+      return;
+    }
+
     try {
       setIsPlacing(true);
 
@@ -92,9 +118,9 @@ export default function CheckoutModal({ open, onClose }) {
         accountName: user?.name || 'Guest',
         accountEmail: user?.email || '',
         customer: selectedAddress || null,
-        items: cartItems,
-        itemCount: cartCount,
-        subtotal: cartTotal,
+        items: checkoutItems,
+        itemCount: checkoutCount,
+        subtotal: checkoutTotal,
         discountCode,
         discountRate: selectedDiscount?.rate || 0,
         discountAmount,
@@ -119,7 +145,9 @@ export default function CheckoutModal({ open, onClose }) {
 
       const savedOrder = await response.json();
       setOrderId(savedOrder.code || generatedOrderCode || savedOrder.id);
-      clearCart();
+      if (typeof onOrderSuccess === 'function') {
+        onOrderSuccess();
+      }
       setSuccess(true);
     } catch (error) {
       notification.error({
@@ -334,9 +362,14 @@ export default function CheckoutModal({ open, onClose }) {
 
         {/* ── 5. Tóm tắt đơn hàng ── */}
         <section>
-          <SectionTitle icon="🛒" title={`Sản phẩm (${cartCount})`} />
+          <SectionTitle icon="🛒" title={`Sản phẩm (${checkoutCount})`} />
+          {unavailableItems.length > 0 && (
+            <div className="mb-2 text-xs text-red-500 font-semibold">
+              Có {unavailableItems.length} sản phẩm hết hàng trong giỏ. Bạn chưa thể đặt đơn.
+            </div>
+          )}
           <div className="bg-gray-50 rounded-xl p-3 space-y-2 mb-3">
-            {cartItems.map((item) => (
+            {checkoutItems.map((item) => (
               <div key={item.id} className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
                   <ProductImage src={item.img} alt={item.name} className="w-full h-full" iconSize="text-base" />
@@ -356,7 +389,7 @@ export default function CheckoutModal({ open, onClose }) {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-gray-500">
               <span>Tạm tính</span>
-              <span>{cartTotal.toLocaleString('vi-VN')}đ</span>
+              <span>{checkoutTotal.toLocaleString('vi-VN')}đ</span>
             </div>
             {discountAmount > 0 && (
               <div className="flex justify-between text-emerald-600">
@@ -390,9 +423,14 @@ export default function CheckoutModal({ open, onClose }) {
             block
             loading={isPlacing}
             onClick={handlePlaceOrder}
+            disabled={unavailableItems.length > 0}
             className="!bg-[#6160DC] hover:!bg-[#5756c5] !rounded-xl !font-bold"
           >
-            {isPlacing ? 'Đang xử lý...' : `Đặt hàng — ${finalTotal.toLocaleString('vi-VN')}đ`}
+            {unavailableItems.length > 0
+              ? 'Có sản phẩm hết hàng'
+              : isPlacing
+                ? 'Đang xử lý...'
+                : `Đặt hàng — ${finalTotal.toLocaleString('vi-VN')}đ`}
           </Button>
         </div>
 

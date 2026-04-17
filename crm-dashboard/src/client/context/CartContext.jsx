@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
 
 const CART_API_URL = 'http://localhost:3001/carts';
+const PRODUCT_API_URL = 'http://localhost:3001/products';
+const CART_SYNC_INTERVAL_MS = 5000;
 
 const CartContext = createContext(null);
 
@@ -9,6 +11,7 @@ function normalizeProduct(product, quantity) {
   const stock = Number(product.stock ?? 0);
   const safeStock = Number.isFinite(stock) && stock >= 0 ? stock : 0;
   const safeQty = Math.max(1, Math.min(Number(quantity || 1), safeStock || Number(quantity || 1)));
+  const isPurchasable = product.status === 'Active' && safeStock > 0;
   return {
     id: product.id,
     name: product.name,
@@ -19,6 +22,7 @@ function normalizeProduct(product, quantity) {
     status: product.status,
     stock: safeStock,
     quantity: safeQty,
+    isPurchasable,
   };
 }
 
@@ -50,10 +54,80 @@ function mergeCartItems(items = []) {
         status: item.status,
         stock: safeItemStock,
         quantity: safeItemStock > 0 ? Math.min(itemQty, safeItemStock) : itemQty,
+        isPurchasable: item.status === 'Active' && safeItemStock > 0,
       });
     }
   });
   return [...map.values()].filter((item) => item.quantity > 0);
+}
+
+function reconcileCartItemsWithProducts(currentItems = [], products = []) {
+  const productById = new Map(products.map((product) => [String(product.id), product]));
+  let hasChanges = false;
+
+  const nextItems = currentItems
+    .map((item) => {
+      const latest = productById.get(String(item.id));
+      // Giữ item trong gio de thong bao het hang, khong xoa silently.
+      if (!latest) {
+        const nextItem = {
+          ...item,
+          status: 'Inactive',
+          stock: 0,
+          isPurchasable: false,
+        };
+        if (
+          nextItem.status !== item.status ||
+          nextItem.stock !== item.stock ||
+          nextItem.isPurchasable !== item.isPurchasable
+        ) {
+          hasChanges = true;
+        }
+        return nextItem;
+      }
+
+      const stock = Number(latest.stock ?? 0);
+      const safeStock = Number.isFinite(stock) && stock >= 0 ? stock : 0;
+      const isPurchasable = latest.status === 'Active' && safeStock > 0;
+      const nextQty = isPurchasable
+        ? Math.max(1, Math.min(Number(item.quantity || 1), safeStock))
+        : Number(item.quantity || 1);
+      const nextItem = {
+        ...item,
+        name: latest.name,
+        category: latest.category,
+        sku: latest.sku,
+        price: latest.price,
+        img: latest.img || '',
+        status: latest.status,
+        stock: safeStock,
+        quantity: nextQty,
+        isPurchasable,
+      };
+
+      if (
+        nextItem.name !== item.name ||
+        nextItem.category !== item.category ||
+        nextItem.sku !== item.sku ||
+        nextItem.price !== item.price ||
+        nextItem.img !== item.img ||
+        nextItem.status !== item.status ||
+        nextItem.stock !== item.stock ||
+        nextItem.quantity !== item.quantity ||
+        nextItem.isPurchasable !== item.isPurchasable
+      ) {
+        hasChanges = true;
+      }
+
+      return nextItem;
+    })
+    .filter(Boolean);
+
+  if (nextItems.length !== currentItems.length) {
+    hasChanges = true;
+  }
+
+  return { nextItems, hasChanges };
 }
 
 export function CartProvider({ children }) {
@@ -218,6 +292,43 @@ export function CartProvider({ children }) {
     };
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!user?.id) return undefined;
+
+    let isUnmounted = false;
+
+    const syncWithLatestProducts = async () => {
+      if (isUnmounted) return;
+      if (cartItems.length === 0) return;
+
+      try {
+        const res = await fetch(PRODUCT_API_URL, { cache: 'no-store' });
+        if (!res.ok) return;
+        const products = await res.json();
+        if (!Array.isArray(products)) return;
+
+        const { nextItems, hasChanges } = reconcileCartItemsWithProducts(cartItems, products);
+        if (!hasChanges) return;
+
+        if (isUnmounted) return;
+        setCartItems(nextItems);
+        enqueueSync(nextItems);
+      } catch {
+        // Bo qua loi tam thoi, se thu lai o chu ky tiep theo.
+      }
+    };
+
+    syncWithLatestProducts();
+    const intervalId = window.setInterval(syncWithLatestProducts, CART_SYNC_INTERVAL_MS);
+    window.addEventListener('focus', syncWithLatestProducts);
+
+    return () => {
+      isUnmounted = true;
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', syncWithLatestProducts);
+    };
+  }, [user?.id, cartItems]);
+
   const addToCart = (product, quantity = 1) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => String(item.id) === String(product.id));
@@ -247,11 +358,21 @@ export function CartProvider({ children }) {
     });
   };
 
+  const removeManyFromCart = (ids = []) => {
+    const idSet = new Set(ids.map((id) => String(id)));
+    setCartItems((prev) => {
+      const nextItems = prev.filter((item) => !idSet.has(String(item.id)));
+      enqueueSync(nextItems);
+      return nextItems;
+    });
+  };
+
   const updateQuantity = (id, quantity) => {
     setCartItems((prev) => {
       const nextItems = prev
         .map((item) => {
           if (String(item.id) !== String(id)) return item;
+          if (item.isPurchasable === false) return item;
           const maxStock = Number(item.stock || 0);
           const requested = Number(quantity || 0);
           if (requested <= 0) return null;
@@ -281,6 +402,7 @@ export function CartProvider({ children }) {
         isCartLoading,
         addToCart,
         removeFromCart,
+        removeManyFromCart,
         updateQuantity,
         clearCart,
       }}

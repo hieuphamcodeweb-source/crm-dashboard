@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { App, Button, Select, Tag, Tooltip } from 'antd';
 import { ReloadOutlined, EyeOutlined } from '@ant-design/icons';
 
 const ORDER_API_URL = 'http://localhost:3001/orders';
+const POLLING_INTERVAL_MS = 5000;
+const REFETCH_OPTIONS = { cache: 'no-store' };
 
 const STATUS_COLORS = {
   Pending: 'gold',
@@ -35,25 +37,43 @@ export default function OrderTable() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async ({ silent = false } = {}) => {
     try {
-      setIsLoading(true);
+      if (!silent) {
+        setIsLoading(true);
+      }
       setFetchError('');
-      const res = await fetch(ORDER_API_URL);
+      const res = await fetch(ORDER_API_URL, REFETCH_OPTIONS);
       if (!res.ok) throw new Error('Không tải được danh sách đơn hàng.');
       const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       setFetchError(error instanceof Error ? error.message : 'Không tải được danh sách đơn hàng.');
-      setOrders([]);
+      if (!silent) {
+        setOrders([]);
+      }
     } finally {
-      setIsLoading(false);
+      if (!silent) {
+        setIsLoading(false);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadOrders();
-  }, []);
+    const pollingId = window.setInterval(() => {
+      loadOrders({ silent: true });
+    }, POLLING_INTERVAL_MS);
+    const handleWindowFocus = () => {
+      loadOrders({ silent: true });
+    };
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.clearInterval(pollingId);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [loadOrders]);
 
   const filteredOrders = useMemo(() => {
     return orders
@@ -137,7 +157,7 @@ export default function OrderTable() {
           <h2 className="text-lg font-bold text-gray-800">Order Management</h2>
           <p className="text-xs font-semibold text-[#6160DC] mt-0.5">Manage all customer orders</p>
         </div>
-        <Button icon={<ReloadOutlined />} onClick={loadOrders}>
+        <Button icon={<ReloadOutlined />} onClick={() => loadOrders()}>
           Refresh
         </Button>
       </div>

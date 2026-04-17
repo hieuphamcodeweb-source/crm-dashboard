@@ -6,17 +6,17 @@
       "category": "Laptop",
       "sku": "MBA-M3-13",
       "price": 32990000,
-      "stock": 112,
+      "stock": 123,
       "status": "Active",
       "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305126/kck02ymmrjqo8va35odv.png"
     },
     {
       "id": "2",
       "name": "iPhone 15 Pro",
-      "category": "Smartphone",
+      "category": "Laptop",
       "sku": "IP15P-256",
       "price": 28990000,
-      "stock": 12,
+      "stock": 123,
       "status": "Active",
       "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305110/ifma6gp8mphddizrn0vo.png"
     },
@@ -55,8 +55,8 @@
       "name": "Sạc 2000W",
       "category": "Phụ kiện",
       "sku": "MU-1",
-      "price": 800000,
-      "stock": 1000,
+      "price": 999999999,
+      "stock": 100000000000,
       "status": "Active",
       "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305167/nh1rxqeryvhrmswh2wvp.png"
     },
@@ -105,17 +105,6 @@
       "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305126/kck02ymmrjqo8va35odv.png"
     },
     {
-      "id": "rJTcCBiBRxg",
-      "name": "Eva Martinez",
-      "category": "Table",
-      "sku": "LOGI-MXKS",
-      "price": 6875,
-      "stock": 12,
-      "status": "Active",
-      "created_at": "2026-04-15T02:20:17.069Z",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233769/h4u2bj4ctgodjffunh27.png"
-    },
-    {
       "id": "PXLYZwaDXjk",
       "name": "Bui Thi R",
       "category": "Phụ Kiện",
@@ -125,17 +114,6 @@
       "status": "Active",
       "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305167/nh1rxqeryvhrmswh2wvp.png",
       "created_at": "2026-04-15T06:58:35.748Z"
-    },
-    {
-      "id": "oMLKRGkWLCU",
-      "name": "XIUUUUUUUUUUUU",
-      "category": "Phụ Kiện",
-      "sku": "MK-ZA",
-      "price": 36520000,
-      "stock": 12,
-      "status": "Active",
-      "created_at": "2026-04-16T08:56:25.314Z",
-      "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305126/kck02ymmrjqo8va35odv.png"
     },
     {
       "id": "L9ry7GhdVQM",
@@ -303,57 +281,86 @@
   ],
   "carts": [
     {
-      "id": "1sY_E6JEkh4",
-      "accountId": "fHQZ4qGVkvM",
-      "accountName": "ADMIN",
-      "accountEmail": "admin@gmail.com",
+      "id": "dbpcRxjFGfc",
+      "accountId": "156bohFOW00",
+      "accountName": "hieu",
+      "accountEmail": "a@gmail.com",
       "items": [
         {
-          "id": "oMLKRGkWLCU",
-          "name": "XIUUUUUUUUUUUU",
+          "id": "w6uaTUmnECQ",
+          "name": "Eva Martinez",
           "category": "Phụ Kiện",
-          "sku": "MK-ZA",
-          "price": 36520000,
+          "sku": "LOGI-MXKS",
+          "price": 845457,
           "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305126/kck02ymmrjqo8va35odv.png",
           "status": "Active",
-          "stock": 12,
-          "quantity": 12
-        }
-      ],
-      "updated_at": "2026-04-16T09:48:36.997Z",
-      "created_at": "2026-04-16T09:48:26.697Z"
-    },
-    {
-      "id": "eH_6ay_eIWg",
-      "accountId": "JZ6_ICgVj58",
-      "accountName": "Client",
-      "accountEmail": "client@gmail.com",
-      "items": [
-        {
-          "id": "2",
-          "name": "iPhone 15 Pro",
-          "category": "Smartphone",
-          "sku": "IP15P-256",
-          "price": 28990000,
-          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305110/ifma6gp8mphddizrn0vo.png",
-          "status": "Active",
-          "stock": 12,
-          "quantity": 11
+          "stock": 68,
+          "quantity": 2,
+          "isPurchasable": true
         },
         {
-          "id": "1",
-          "name": "MacBook Air M4",
+          "id": "51CsWDx0Wwc",
+          "name": "Macbock",
           "category": "Laptop",
-          "sku": "MBA-M3-13",
-          "price": 32990000,
-          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305126/kck02ymmrjqo8va35odv.png",
+          "sku": "MDA-4",
+          "price": 21500000,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233718/g0jpl9xzfx4981wsuzkz.png",
           "status": "Active",
-          "stock": 112,
-          "quantity": 112
+          "stock": 25,
+          "quantity": 1,
+          "isPurchasable": true
+        },
+        {
+          "id": "L9ry7GhdVQM",
+          "name": "hieu",
+          "category": "Smartphone",
+          "sku": "LOGI-MXKS",
+          "price": 32123000,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233718/g0jpl9xzfx4981wsuzkz.png",
+          "status": "Active",
+          "stock": 21,
+          "quantity": 1,
+          "isPurchasable": true
+        },
+        {
+          "id": "4",
+          "name": "Logitech MX Keys S",
+          "category": "Keyboard",
+          "sku": "LOGI-MXKS",
+          "price": 2790000,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233718/g0jpl9xzfx4981wsuzkz.png",
+          "status": "Active",
+          "stock": 12,
+          "quantity": 1,
+          "isPurchasable": true
+        },
+        {
+          "id": "GsZ_m_lLtuQ",
+          "name": "Sạc 2000W",
+          "category": "Phụ kiện",
+          "sku": "MU-1",
+          "price": 999999999,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305167/nh1rxqeryvhrmswh2wvp.png",
+          "status": "Active",
+          "stock": 100000000000,
+          "quantity": 1,
+          "isPurchasable": true
+        },
+        {
+          "id": "h2Mt6aOJD3A",
+          "name": "Jack Anderson",
+          "category": "Smartphone",
+          "sku": "LOGI-MXKS",
+          "price": 85458,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776305110/ifma6gp8mphddizrn0vo.png",
+          "status": "Active",
+          "stock": 28,
+          "quantity": 1,
+          "isPurchasable": true
         }
       ],
-      "updated_at": "2026-04-16T10:00:41.886Z",
-      "created_at": "2026-04-16T09:53:27.140Z"
+      "updated_at": "2026-04-17T03:28:48.692Z",
+      "created_at": "2026-04-17T03:14:01.665Z"
     }
   ],
   "orders": [
@@ -649,6 +656,67 @@
       "created_at": "2026-04-16T09:18:56.642Z",
       "updated_at": "2026-04-16T09:18:56.642Z",
       "id": "RvIHmJB44-Y"
+    },
+    {
+      "code": "ORD-633679",
+      "accountId": "156bohFOW00",
+      "accountName": "hieu",
+      "accountEmail": "a@gmail.com",
+      "customer": {
+        "id": 1,
+        "name": "Nguyễn Văn An",
+        "phone": "0901 234 567",
+        "address": "123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh"
+      },
+      "items": [
+        {
+          "id": "3",
+          "name": "Sony WH-1000XM5",
+          "category": "Headphone",
+          "sku": "SONY-XM5",
+          "price": 7990000,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233678/uzzclijqbbaoqlknpapx.png",
+          "status": "Active",
+          "stock": 45,
+          "quantity": 1,
+          "isPurchasable": true
+        },
+        {
+          "id": "4",
+          "name": "Logitech MX Keys S",
+          "category": "Keyboard",
+          "sku": "LOGI-MXKS",
+          "price": 2790000,
+          "img": "https://res.cloudinary.com/digvlzedr/image/upload/v1776233718/g0jpl9xzfx4981wsuzkz.png",
+          "status": "Active",
+          "stock": 12,
+          "quantity": 1,
+          "isPurchasable": true
+        }
+      ],
+      "itemCount": 2,
+      "subtotal": 10780000,
+      "discountCode": "none",
+      "discountRate": 0,
+      "discountAmount": 0,
+      "shippingMethod": {
+        "id": "standard",
+        "label": "Giao hàng tiêu chuẩn",
+        "desc": "3 – 5 ngày làm việc",
+        "fee": 0,
+        "icon": "📦"
+      },
+      "shippingFee": 0,
+      "paymentMethod": {
+        "id": "cod",
+        "label": "Thanh toán khi nhận hàng (COD)",
+        "icon": "💵"
+      },
+      "total": 10780000,
+      "status": "Pending",
+      "created_at": "2026-04-17T03:13:53.679Z",
+      "updated_at": "2026-04-17T03:13:53.679Z",
+      "id": "-vQxsEHr2kw"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

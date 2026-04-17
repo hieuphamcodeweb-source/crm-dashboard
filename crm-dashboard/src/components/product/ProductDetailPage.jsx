@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { App, Button, Spin, Tag } from 'antd';
 import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import ProductImage from '../shared/ProductImage';
 
 const PRODUCT_API_URL = 'http://localhost:3001/products';
+const POLLING_INTERVAL_MS = 5000;
+const REFETCH_OPTIONS = { cache: 'no-store' };
 
 function InfoRow({ label, children }) {
   return (
@@ -22,28 +24,45 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function loadProduct() {
-      try {
+  const loadProduct = useCallback(async ({ silent = false } = {}) => {
+    try {
+      if (!silent) {
         setIsLoading(true);
-        const response = await fetch(`${PRODUCT_API_URL}/${id}`);
-        if (!response.ok) throw new Error('Không tìm thấy sản phẩm.');
-        const data = await response.json();
-        if (isMounted) setProduct(data);
-      } catch (error) {
+      }
+      const response = await fetch(`${PRODUCT_API_URL}/${id}`, REFETCH_OPTIONS);
+      if (!response.ok) throw new Error('Không tìm thấy sản phẩm.');
+      const data = await response.json();
+      setProduct(data);
+    } catch (error) {
+      if (!silent) {
         notification.error({
           title: 'Không tải được dữ liệu',
           description: error instanceof Error ? error.message : 'Đã có lỗi xảy ra.',
           placement: 'topRight',
         });
-      } finally {
-        if (isMounted) setIsLoading(false);
+      }
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
       }
     }
+  }, [id, notification]);
+
+  useEffect(() => {
     loadProduct();
-    return () => { isMounted = false; };
-  }, [id]);
+    const pollingId = window.setInterval(() => {
+      loadProduct({ silent: true });
+    }, POLLING_INTERVAL_MS);
+    const handleWindowFocus = () => {
+      loadProduct({ silent: true });
+    };
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.clearInterval(pollingId);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [loadProduct]);
 
   if (isLoading) {
     return (
