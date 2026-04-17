@@ -3,6 +3,7 @@ import { App, Button, Form, Input, InputNumber, Select, Spin } from 'antd';
 import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import ProductImage from '../shared/ProductImage';
+import { buildCategoryOptions, buildProductPayload, validateActiveStock, validateImageUrl } from './product.utils';
 
 const PRODUCT_API_URL = 'http://localhost:3001/products';
 const CATEGORY_API_URL = 'http://localhost:3001/categories';
@@ -64,20 +65,7 @@ export default function ProductEditPage() {
             img: productData.img || '',
           });
           setPreviewImg(productData.img || '');
-          if (Array.isArray(categoryData)) {
-            const seen = new Set();
-            setCategoryOptions(
-              categoryData
-                .filter((category) => {
-                  if (seen.has(category.name)) return false;
-                  seen.add(category.name);
-                  return true;
-                })
-                .map((category) => ({ label: category.name, value: category.name }))
-            );
-          } else {
-            setCategoryOptions([]);
-          }
+          setCategoryOptions(buildCategoryOptions(categoryData));
         }
       } catch (error) {
         notification.error({
@@ -103,14 +91,7 @@ export default function ProductEditPage() {
     try {
       const values = await form.validateFields();
       setIsSubmitting(true);
-      const normalizedStock = values.status === 'Inactive' ? 0 : values.stock;
-
-      const payload = {
-        ...product,
-        ...values,
-        stock: normalizedStock,
-        sku: values.sku.toUpperCase(),
-      };
+      const payload = buildProductPayload(product, values);
 
       const response = await fetch(`${PRODUCT_API_URL}/${id}`, {
         method: 'PUT',
@@ -145,11 +126,7 @@ export default function ProductEditPage() {
     { type: 'url', message: 'Vui lòng nhập URL hợp lệ (http/https)' },
     {
       validator: (_, value) => {
-        if (!value) return Promise.resolve();
-        const hasImageExtension = /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(value);
-        const isCloudinaryLike = /res\.cloudinary\.com/i.test(value);
-        if (hasImageExtension || isCloudinaryLike) return Promise.resolve();
-        return Promise.reject(new Error('URL ảnh phải là định dạng ảnh phổ biến (png, jpg, jpeg, webp, svg, gif)'));
+        return validateImageUrl(value);
       },
     },
   ];
@@ -251,10 +228,7 @@ export default function ProductEditPage() {
             ({ getFieldValue }) => ({
               validator(_, value) {
                 const status = getFieldValue('status');
-                if (status === 'Active' && Number(value) <= 0) {
-                  return Promise.reject(new Error('Stock phải lớn hơn 0 khi trạng thái là Active'));
-                }
-                return Promise.resolve();
+                return validateActiveStock(status, value);
               },
             }),
           ]}
