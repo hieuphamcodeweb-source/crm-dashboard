@@ -2,29 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { App, Button, Form, Input, Modal, Tooltip } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import {
+  buildCategoryPayload,
+  filterAndSortCategories,
+  formatDateTime,
+  isDuplicateCategoryName,
+  isDuplicateCategorySlug,
+  slugify,
+} from './category.utils';
 
 const CATEGORY_API_URL = 'http://localhost:3001/categories';
 const POLLING_INTERVAL_MS = 5000;
 const REFETCH_OPTIONS = { cache: 'no-store' };
-
-function slugify(input = '') {
-  return input
-    .toString()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-}
-
-function formatDateTime(value) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString('vi-VN');
-}
 
 export default function CategoryTable() {
   const [form] = Form.useForm();
@@ -80,29 +69,7 @@ export default function CategoryTable() {
   }, [loadCategories]);
 
   const filteredCategories = useMemo(() => {
-    const matched = categories.filter(
-      (category) =>
-        category.name.toLowerCase().includes(search.toLowerCase()) ||
-        category.slug.toLowerCase().includes(search.toLowerCase())
-    );
-
-    if (sortBy === 'A-Z') {
-      return [...matched].sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    if (sortBy === 'Oldest') {
-      return [...matched].sort((a, b) =>
-        a.created_at && b.created_at
-          ? new Date(a.created_at) - new Date(b.created_at)
-          : Number(a.id) - Number(b.id)
-      );
-    }
-
-    return [...matched].sort((a, b) =>
-      a.created_at && b.created_at
-        ? new Date(b.created_at) - new Date(a.created_at)
-        : Number(b.id) - Number(a.id)
-    );
+    return filterAndSortCategories(categories, search, sortBy);
   }, [categories, search, sortBy]);
 
   const openAddModal = () => {
@@ -133,17 +100,7 @@ export default function CategoryTable() {
     try {
       const values = await form.validateFields();
       setIsSubmitting(true);
-      const maxId = categories.reduce((max, category) => Math.max(max, Number(category.id) || 0), 0);
-      const nextId = maxId + 1;
-
-      const now = new Date().toISOString();
-      const payload = {
-        id: nextId,
-        name: values.name.trim(),
-        slug: slugify(values.slug),
-        created_at: now,
-        updated_at: now,
-      };
+      const payload = buildCategoryPayload(categories, values);
 
       const response = await fetch(CATEGORY_API_URL, {
         method: 'POST',
@@ -319,9 +276,7 @@ export default function CategoryTable() {
               {
                 validator: (_, value) => {
                   if (!value) return Promise.resolve();
-                  const duplicated = categories.some(
-                    (category) => category.name.toLowerCase() === value.trim().toLowerCase()
-                  );
+                  const duplicated = isDuplicateCategoryName(categories, value);
                   return duplicated ? Promise.reject(new Error('Category name already exists')) : Promise.resolve();
                 },
               },
@@ -343,9 +298,7 @@ export default function CategoryTable() {
               {
                 validator: (_, value) => {
                   if (!value) return Promise.resolve();
-                  const duplicated = categories.some(
-                    (category) => category.slug.toLowerCase() === value.toLowerCase()
-                  );
+                  const duplicated = isDuplicateCategorySlug(categories, value);
                   return duplicated ? Promise.reject(new Error('Slug already exists')) : Promise.resolve();
                 },
               },
