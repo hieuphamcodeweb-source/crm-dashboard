@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, Select, Spin, Tag, Empty } from 'antd';
 import { SearchOutlined, FilterOutlined, EyeOutlined } from '@ant-design/icons';
@@ -6,6 +6,8 @@ import ProductImage from '../../components/shared/ProductImage';
 
 const PRODUCT_API_URL = 'http://localhost:3001/products';
 const CATEGORY_API_URL = 'http://localhost:3001/categories';
+const POLLING_INTERVAL_MS = 5000;
+const REFETCH_OPTIONS = { cache: 'no-store' };
 
 function ProductCard({ product, onView }) {
   const isActive = product.status === 'Active';
@@ -66,34 +68,49 @@ export default function ClientProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    let isMounted = true;
-    async function loadData() {
-      try {
+  const loadData = useCallback(async ({ silent = false } = {}) => {
+    try {
+      if (!silent) {
         setIsLoading(true);
-        setError('');
-        const [prodRes, catRes] = await Promise.all([
-          fetch(PRODUCT_API_URL),
-          fetch(CATEGORY_API_URL),
-        ]);
-        if (!prodRes.ok) throw new Error('Không tải được danh sách sản phẩm.');
-        const [prodData, catData] = await Promise.all([
-          prodRes.json(),
-          catRes.ok ? catRes.json() : Promise.resolve([]),
-        ]);
-        if (isMounted) {
-          setProducts(Array.isArray(prodData) ? prodData : []);
-          setCategories(Array.isArray(catData) ? catData : []);
-        }
-      } catch (err) {
-        if (isMounted) setError(err instanceof Error ? err.message : 'Đã có lỗi xảy ra.');
-      } finally {
-        if (isMounted) setIsLoading(false);
+      }
+      setError('');
+      const [prodRes, catRes] = await Promise.all([
+        fetch(PRODUCT_API_URL, REFETCH_OPTIONS),
+        fetch(CATEGORY_API_URL, REFETCH_OPTIONS),
+      ]);
+      if (!prodRes.ok) throw new Error('Không tải được danh sách sản phẩm.');
+      const [prodData, catData] = await Promise.all([
+        prodRes.json(),
+        catRes.ok ? catRes.json() : Promise.resolve([]),
+      ]);
+      setProducts(Array.isArray(prodData) ? prodData : []);
+      setCategories(Array.isArray(catData) ? catData : []);
+    } catch (err) {
+      if (!silent) {
+        setError(err instanceof Error ? err.message : 'Đã có lỗi xảy ra.');
+      }
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
       }
     }
-    loadData();
-    return () => { isMounted = false; };
   }, []);
+
+  useEffect(() => {
+    loadData();
+    const pollingId = window.setInterval(() => {
+      loadData({ silent: true });
+    }, POLLING_INTERVAL_MS);
+    const handleWindowFocus = () => {
+      loadData({ silent: true });
+    };
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.clearInterval(pollingId);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [loadData]);
 
   const categoryOptions = useMemo(() => {
     const seen = new Set();

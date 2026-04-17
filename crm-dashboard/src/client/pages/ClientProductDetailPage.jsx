@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { App, Button, InputNumber, Modal, Spin, Tag } from 'antd';
 import { ArrowLeftOutlined, MinusOutlined, PlusOutlined, ShoppingCartOutlined, CheckOutlined } from '@ant-design/icons';
@@ -7,6 +7,8 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 const PRODUCT_API_URL = 'http://localhost:3001/products';
+const POLLING_INTERVAL_MS = 5000;
+const REFETCH_OPTIONS = { cache: 'no-store' };
 
 export default function ClientProductDetailPage() {
   const { id } = useParams();
@@ -26,24 +28,41 @@ export default function ClientProductDetailPage() {
   const cartItem = cartItems.find((item) => String(item.id) === String(id));
   const cartQty = Number(cartItem?.quantity || 0);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function load() {
-      try {
+  const loadProduct = useCallback(async ({ silent = false } = {}) => {
+    try {
+      if (!silent) {
         setIsLoading(true);
-        const res = await fetch(`${PRODUCT_API_URL}/${id}`);
-        if (!res.ok) throw new Error('Không tìm thấy sản phẩm.');
-        const data = await res.json();
-        if (isMounted) setProduct(data);
-      } catch (err) {
-        if (isMounted) setError(err instanceof Error ? err.message : 'Đã có lỗi xảy ra.');
-      } finally {
-        if (isMounted) setIsLoading(false);
+      }
+      const res = await fetch(`${PRODUCT_API_URL}/${id}`, REFETCH_OPTIONS);
+      if (!res.ok) throw new Error('Không tìm thấy sản phẩm.');
+      const data = await res.json();
+      setProduct(data);
+      setError('');
+    } catch (err) {
+      setProduct(null);
+      setError(err instanceof Error ? err.message : 'Đã có lỗi xảy ra.');
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
       }
     }
-    load();
-    return () => { isMounted = false; };
   }, [id]);
+
+  useEffect(() => {
+    loadProduct();
+    const pollingId = window.setInterval(() => {
+      loadProduct({ silent: true });
+    }, POLLING_INTERVAL_MS);
+    const handleWindowFocus = () => {
+      loadProduct({ silent: true });
+    };
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.clearInterval(pollingId);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [loadProduct]);
 
   const openAddModal = () => {
     if (!isAuthenticated) {
